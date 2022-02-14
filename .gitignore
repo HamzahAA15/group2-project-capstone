@@ -1,0 +1,8 @@
+# Sensitive Files
+.env
+
+# Mac Files
+.DS_Store
+
+# VSCode Files
+.vscode
