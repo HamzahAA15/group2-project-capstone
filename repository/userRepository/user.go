@@ -18,6 +18,26 @@ func NewMySQLUserRepository(db *sql.DB) UserRepoInterface {
 	}
 }
 
+func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
+	var users []userEntities.User
+
+	result, err := ur.db.Query(`SELECT id, username, email, password, avatar, created_at FROM users WHERE deleted_at IS NULL`)
+	if err != nil {
+		return users, err
+	}
+
+	for result.Next() {
+		var user userEntities.User
+
+		err = result.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.CreatedAt)
+		if err != nil {
+			return users, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
 func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	var user userEntities.User
 

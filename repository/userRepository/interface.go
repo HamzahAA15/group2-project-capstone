@@ -5,6 +5,7 @@ import (
 )
 
 type UserRepoInterface interface {
+	GetUsers() ([]userEntities.User, error)
 	GetUser(id string) (userEntities.User, error)
 	DeleteUser(loginId string) error
 }
