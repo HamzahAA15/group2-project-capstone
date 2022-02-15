@@ -15,6 +15,7 @@ func (ur UserResource) UserRoute(userRepo userRepository.UserRepoInterface) *mux
 	userHandler := userHandler.NewUserHandler(userService)
 
 	router := mux.NewRouter()
+	router.HandleFunc("/", userHandler.GetUsersHandler).Methods("GET")
 	router.HandleFunc("/{id}", userHandler.GetUserHandler).Methods("GET")
 	router.HandleFunc("/{id}", userHandler.DeleteUserHandler).Methods("DELETE")
 	return router
