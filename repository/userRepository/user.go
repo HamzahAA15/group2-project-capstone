@@ -2,6 +2,7 @@ package userRepository
 
 import (
 	"database/sql"
+	"fmt"
 	"sirclo/project-capstone/entities/userEntities"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -28,4 +29,25 @@ func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	}
 
 	return user, nil
+}
+
+func (ur *userRepo) DeleteUser(loginId string) error {
+	query := `UPDATE users SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL`
+
+	statement, err := ur.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, errExec := statement.Exec(loginId)
+	if errExec != nil {
+		return errExec
+	}
+
+	mengubah, _ := result.RowsAffected()
+	if mengubah == 0 {
+		return fmt.Errorf("event not found")
+	}
+	return nil
+
 }
