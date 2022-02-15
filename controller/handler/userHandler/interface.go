@@ -4,4 +4,5 @@ import "net/http"
 
 type UserHandlerInterface interface {
 	GetUserHandler(w http.ResponseWriter, r *http.Request)
+	DeleteUserHandler(w http.ResponseWriter, r *http.Request)
 }

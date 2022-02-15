@@ -35,3 +35,18 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 
 }
+
+func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	err := uh.userService.DeleteUser(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("not found"))
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("delete success"))
+}
