@@ -69,6 +69,24 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 	return user, nil
 }
 
+func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error) {
+	query := `UPDATE users SET username = ?, email = ?, password = ?, updated_at = ? WHERE id = ?`
+
+	statement, err := ur.db.Prepare(query)
+	if err != nil {
+		return user, err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(user.Username, user.Email, user.Password, user.UpdatedAt, user.ID)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
 func (ur *userRepo) DeleteUser(loginId string) error {
 	query := `UPDATE users SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL`
 
