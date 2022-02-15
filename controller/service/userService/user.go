@@ -47,6 +47,23 @@ func (us *userService) CreateUser(input userRequest.CreateUserInput) (userEntiti
 	return createUser, err
 }
 
+func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) (userEntities.User, error) {
+	user, err := us.GetUser(id)
+	if err != nil {
+		return user, err
+	}
+
+	user.Username = input.Username
+	user.Email = input.Email
+	passwordHash, _ := validation.HashPassword(input.Password)
+	user.Password = passwordHash
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
+	updateUser, err := us.userRepository.UpdateUser(user)
+	return updateUser, err
+}
+
 func (us *userService) DeleteUser(loginId string) error {
 	err := us.userRepository.DeleteUser(loginId)
 	return err

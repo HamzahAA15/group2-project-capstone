@@ -60,6 +60,27 @@ func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	w.Write(response)
 }
 
+func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var input userRequest.UpdateUserInput
+
+	decoder := json.NewDecoder(r.Body)
+	_ = decoder.Decode(&input)
+
+	user, err := uh.userService.UpdateUser(id, input)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("internal service error"))
+	}
+
+	response, _ := json.Marshal(user)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
+}
+
 func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
