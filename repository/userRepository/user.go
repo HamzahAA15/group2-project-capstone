@@ -21,7 +21,7 @@ func NewMySQLUserRepository(db *sql.DB) UserRepoInterface {
 func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	var user userEntities.User
 
-	row := ur.db.QueryRow(`SELECT id, username, email, password, avatar, created_at FROM users WHERE id = ?`, id)
+	row := ur.db.QueryRow(`SELECT id, username, email, password, avatar, created_at FROM users WHERE id = ? AND deleted_at IS NULL`, id)
 
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.CreatedAt)
 	if err != nil {
@@ -44,8 +44,8 @@ func (ur *userRepo) DeleteUser(loginId string) error {
 		return errExec
 	}
 
-	mengubah, _ := result.RowsAffected()
-	if mengubah == 0 {
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
 		return fmt.Errorf("event not found")
 	}
 	return nil
