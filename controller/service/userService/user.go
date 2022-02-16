@@ -20,6 +20,20 @@ func NewUserService(repo userRepository.UserRepoInterface) UserServiceInterface 
 	}
 }
 
+func (us *userService) LoginUserService(input userRequest.LoginUserInput) (userEntities.User, error) {
+	email := input.Identity
+	password := input.Password
+
+	var user userEntities.User
+	user, err := us.userRepository.Login(email)
+	if err != nil {
+		return user, err
+	}
+
+	err = validation.CheckPassword(password, user.Password)
+	return user, err
+}
+
 func (us *userService) GetUsers() ([]userEntities.User, error) {
 	users, err := us.userRepository.GetUsers()
 	if err != nil {
