@@ -18,6 +18,38 @@ func NewMySQLUserRepository(db *sql.DB) UserRepoInterface {
 	}
 }
 
+func (ur *userRepo) CheckEmail(userChecked userEntities.User) (userEntities.User, error) {
+	user := userEntities.User{}
+	result, err := ur.db.Query("SELECT email FROM users WHERE email=?", userChecked.Email)
+	if err != nil {
+		return user, err
+	}
+	defer result.Close()
+	if isExist := result.Next(); isExist {
+		return user, fmt.Errorf("user already exist")
+	}
+
+	if user.Email != userChecked.Email {
+		// usernya belum ada
+		return user, nil
+	}
+
+	return user, nil
+}
+
+func (ur *userRepo) Login(identity string) (userEntities.User, error) {
+	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE username = ? OR email = ?`, identity, identity)
+
+	var user userEntities.User
+
+	err := row.Scan(&user.ID, &user.Email, &user.Password)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
 func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 	var users []userEntities.User
 
