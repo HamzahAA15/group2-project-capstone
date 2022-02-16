@@ -6,6 +6,7 @@ import (
 )
 
 type UserServiceInterface interface {
+	LoginUserService(input userRequest.LoginUserInput) (userEntities.User, error)
 	GetUsers() ([]userEntities.User, error)
 	GetUser(id string) (userEntities.User, error)
 	CreateUser(input userRequest.CreateUserInput) (userEntities.User, error)
