@@ -1,8 +1,10 @@
 package userRouter
 
 import (
+	"net/http"
 	"sirclo/project-capstone/controller/handler/userHandler"
 	"sirclo/project-capstone/controller/service/userService"
+	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/repository/userRepository"
 
 	"github.com/gorilla/mux"
@@ -15,10 +17,12 @@ func (ur UserResource) UserRoute(userRepo userRepository.UserRepoInterface) *mux
 	userHandler := userHandler.NewUserHandler(userService)
 
 	router := mux.NewRouter()
+	router.HandleFunc("/login", userHandler.Login).Methods("POST")
 	router.HandleFunc("/", userHandler.GetUsersHandler).Methods("GET")
 	router.HandleFunc("/{id}", userHandler.GetUserHandler).Methods("GET")
 	router.HandleFunc("/", userHandler.CreateUserHandler).Methods("POST")
 	router.HandleFunc("/{id}", userHandler.UpdateUserHandler).Methods("PUT")
-	router.HandleFunc("/{id}", userHandler.DeleteUserHandler).Methods("DELETE")
+	// router.HandleFunc("/{id}", userHandler.DeleteUserHandler).Methods("DELETE")
+	router.Handle("/", middleware.Authentication(http.HandlerFunc(userHandler.DeleteUserHandler))).Methods("DELETE")
 	return router
 }
