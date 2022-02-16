@@ -3,6 +3,7 @@ package userHandler
 import "net/http"
 
 type UserHandlerInterface interface {
+	Login(w http.ResponseWriter, r *http.Request)
 	GetUsersHandler(w http.ResponseWriter, r *http.Request)
 	GetUserHandler(w http.ResponseWriter, r *http.Request)
 	CreateUserHandler(w http.ResponseWriter, r *http.Request)
