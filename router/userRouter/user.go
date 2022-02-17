@@ -23,5 +23,6 @@ func (ur UserResource) UserRoute(userRepo userRepository.UserRepoInterface) *mux
 	router.HandleFunc("/{id}", userHandler.GetUserHandler).Methods("GET")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(userHandler.UpdateUserHandler))).Methods("PUT")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(userHandler.DeleteUserHandler))).Methods("DELETE")
+	router.Handle("/avatar", middleware.Authentication(http.HandlerFunc(userHandler.UploadFileHandler))).Methods("POST")
 	return router
 }
