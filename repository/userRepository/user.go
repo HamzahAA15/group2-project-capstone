@@ -53,7 +53,7 @@ func (ur *userRepo) Login(identity string) (userEntities.User, error) {
 func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 	var users []userEntities.User
 
-	result, err := ur.db.Query(`SELECT id, username, email, password, avatar, created_at FROM users WHERE deleted_at IS NULL`)
+	result, err := ur.db.Query(`SELECT id, avatar, username, email, name, phone, role, created_at FROM users WHERE deleted_at IS NULL`)
 	if err != nil {
 		return users, err
 	}
@@ -61,10 +61,11 @@ func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 	for result.Next() {
 		var user userEntities.User
 
-		err = result.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.CreatedAt)
+		err = result.Scan(&user.ID, &user.Avatar, &user.Username, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
 		if err != nil {
 			return users, err
 		}
+
 		users = append(users, user)
 	}
 	return users, nil
@@ -73,9 +74,9 @@ func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	var user userEntities.User
 
-	row := ur.db.QueryRow(`SELECT id, username, email, password, avatar, created_at FROM users WHERE id = ? AND deleted_at IS NULL`, id)
+	row := ur.db.QueryRow(`SELECT id, avatar, username, email, name, phone, role, created_at FROM users WHERE id = ? AND deleted_at IS NULL`, id)
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Avatar, &user.CreatedAt)
+	err := row.Scan(&user.ID, &user.Avatar, &user.Username, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -134,8 +135,8 @@ func (ur *userRepo) DeleteUser(loginId string) error {
 
 	affected, _ := result.RowsAffected()
 	if affected == 0 {
-		return fmt.Errorf("event not found")
+		return fmt.Errorf("user not found")
 	}
-	return nil
 
+	return nil
 }
