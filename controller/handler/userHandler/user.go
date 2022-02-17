@@ -3,11 +3,17 @@ package userHandler
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils/request/userRequest"
+	"sirclo/project-capstone/utils/upload"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gorilla/mux"
 )
 
@@ -157,4 +163,61 @@ func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request)
 		response, _ := json.Marshal(http.StatusOK)
 		w.Write(response)
 	}
+}
+
+func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
+	maxSize := int64(2048000)
+
+	err := r.ParseMultipartForm(maxSize)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(fmt.Sprintf("Image too large. Max Size: %v", maxSize)))
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("avatar")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Could not get uploaded file"))
+		return
+	}
+	defer file.Close()
+
+	s, err := session.NewSession(&aws.Config{
+		Region: aws.String(os.Getenv("REGION")),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("KEYID"),
+			os.Getenv("SECRETKEY"),
+			""),
+	})
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadGateway)
+		response, _ := json.Marshal(http.StatusBadGateway)
+		w.Write(response)
+		return
+	}
+
+	fileLoc, err := upload.UploadFile(user.ID, "users", s, file, fileHeader)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadGateway)
+		w.Write([]byte("file extension isn't equal to .png, .jpg. and .jpeg"))
+		return
+	}
+
+	err_upload := uh.userService.UploadAvatarUser(user.ID, fileLoc)
+	if err_upload != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("failed to upload photo"))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("Image uploaded successfully: %v", fileLoc)))
 }
