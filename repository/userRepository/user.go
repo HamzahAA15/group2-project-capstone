@@ -140,3 +140,25 @@ func (ur *userRepo) DeleteUser(loginId string) error {
 
 	return nil
 }
+
+func (us *userRepo) UploadAvatarUser(user userEntities.User) error {
+	query := `UPDATE users SET avatar = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL`
+
+	statement, err := us.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, errExec := statement.Exec(user.Avatar, user.UpdatedAt, user.ID)
+	if errExec != nil {
+		return errExec
+	}
+
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
+
+}

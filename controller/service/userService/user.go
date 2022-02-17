@@ -1,6 +1,7 @@
 package userService
 
 import (
+	"fmt"
 	"sirclo/project-capstone/entities/userEntities"
 	"sirclo/project-capstone/repository/userRepository"
 	"sirclo/project-capstone/utils/request/userRequest"
@@ -85,5 +86,20 @@ func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) 
 
 func (us *userService) DeleteUser(loginId string) error {
 	err := us.userRepository.DeleteUser(loginId)
+	return err
+}
+
+func (us *userService) UploadAvatarUser(id string, imageURL string) error {
+	user, err1 := us.GetUser(id)
+	fmt.Println("service upload: ", user)
+	fmt.Println("service err_upload: ", err1)
+	if err1 != nil {
+		return err1
+	}
+	user.ID = id
+	user.Avatar = imageURL
+	user.UpdatedAt = time.Now()
+
+	err := us.userRepository.UploadAvatarUser(user)
 	return err
 }

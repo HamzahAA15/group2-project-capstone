@@ -12,4 +12,5 @@ type UserRepoInterface interface {
 	CreateUser(user userEntities.User) (userEntities.User, error)
 	UpdateUser(user userEntities.User) (userEntities.User, error)
 	DeleteUser(loginId string) error
+	UploadAvatarUser(user userEntities.User) error
 }
