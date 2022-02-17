@@ -8,7 +8,7 @@ CREATE TABLE users (
 	password VARCHAR(255) NOT NULL,
 	name VARCHAR(50) NOT NULL,
 	phone VARCHAR(20) UNIQUE NOT NULL,
-    role int DEFAULT 0 NOT NULL,
+    role VARCHAR(20) DEFAULT "user" NOT NULL,
 	created_at TIMESTAMP DEFAULT now(),
 	updated_at TIMESTAMP DEFAULT now(),
 	deleted_at TIMESTAMP
