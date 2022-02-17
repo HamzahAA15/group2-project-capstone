@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,9 +19,8 @@ type contextKey struct {
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
-
 		if !strings.Contains(header, "Bearer") {
-			next.ServeHTTP(w, r)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
@@ -46,21 +44,10 @@ func Authentication(next http.Handler) http.Handler {
 		}
 
 		userID := payload["id"].(string)
-
-		// create user and check if user exists in db
 		user := userEntities.User{ID: userID}
-		// var userServicer userService.UserServiceInterface
-		// user, err := userServicer.GetUser(userID)
-		// if err != nil {
-		// 	next.ServeHTTP(w, r)
-		// 	return
-		// }
-		// user.ID = userID
-		// put it in context
-		ctx := context.WithValue(r.Context(), ctxKey, &user)
-		fmt.Println("ini ctx", ctx)
 
-		// and call the next with our new context
+		ctx := context.WithValue(r.Context(), ctxKey, &user)
+
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
