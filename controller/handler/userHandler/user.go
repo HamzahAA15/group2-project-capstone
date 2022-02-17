@@ -96,36 +96,46 @@ func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	_ = decoder.Decode(&input)
 
 	user, err := uh.userService.CreateUser(input)
-	if err != nil {
+	switch {
+	case err != nil: // error internal server
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("internal service error"))
-	}
 
-	response, _ := json.Marshal(user)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
+		response, _ := json.Marshal(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(user)
+		w.Write(response)
+	}
 }
 
 func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
 
 	var input userRequest.UpdateUserInput
 
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&input)
 
-	user, err := uh.userService.UpdateUser(id, input)
-	if err != nil {
+	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
+	switch {
+	case err != nil: // error internal server
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("internal service error"))
-	}
 
-	response, _ := json.Marshal(user)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
+		response, _ := json.Marshal(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(userUpdate)
+		w.Write(response)
+	}
 }
 
 func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
