@@ -3,14 +3,10 @@ package middleware
 import (
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt"
-)
-
-// secret key being used to sign tokens
-var (
-	SecretKey = []byte("buburdepok")
 )
 
 // GenerateToken generates a jwt token and assign a username to it's claims and return it
@@ -21,7 +17,7 @@ func GenerateToken(userId string) (string, error) {
 	payload["id"] = userId
 	payload["exp"] = time.Now().Add(time.Hour * 144).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	signedToken, err := token.SignedString(SecretKey)
+	signedToken, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		log.Fatal("Error in Generating key")
 		return signedToken, err
@@ -36,11 +32,12 @@ func ValidateToken(encodedToken string) (*jwt.Token, error) {
 		if !ok {
 			return nil, errors.New("invalid token")
 		}
-		return SecretKey, nil
-	})
 
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	})
 	if err != nil {
 		return token, err
 	}
+
 	return token, nil
 }
