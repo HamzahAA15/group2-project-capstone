@@ -1,8 +1,8 @@
 package userHandler
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
@@ -46,26 +46,48 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *userHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	// id := vars["id"]
-
 	users, err := uh.userService.GetUsers()
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("not found"))
+	switch {
+	case err != nil: // error internal server
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+
+		response, _ := json.Marshal(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(users)
+		w.Write(response)
 	}
+}
 
-	// var data []userEntities.User
-	// for i, _ := range users {
-	// 	data = append(data, users[i])
-	// }
-	response, _ := json.Marshal(users)
+func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
+	user, err := uh.userService.GetUser(id)
+	switch {
+	case err == sql.ErrNoRows: //check data is null?
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
 
+		response, _ := json.Marshal(http.StatusNotFound)
+		w.Write(response)
+	case err != nil: // error internal server
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+
+		response, _ := json.Marshal(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(user)
+		w.Write(response)
+	}
 }
 
 func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -106,37 +128,23 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	w.Write(response)
 }
 
-func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	user, err := uh.userService.GetUser(id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("not found"))
-	}
-
-	response, _ := json.Marshal(user)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
-
-}
-
 func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
-	// vars := mux.Vars(r)
-	// id := vars["id"]
 
 	err := uh.userService.DeleteUser(user.ID)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("not found"))
-	}
+	switch {
+	case err != nil: // error internal server
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("delete success"))
+		response, _ := json.Marshal(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response, _ := json.Marshal(http.StatusOK)
+		w.Write(response)
+	}
 }
