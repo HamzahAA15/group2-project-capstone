@@ -85,7 +85,7 @@ func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 }
 
 func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error) {
-	query := `INSERT INTO users (id, username, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (id, avatar, username, email, password, name, phone, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	statement, err := ur.db.Prepare(query)
 	if err != nil {
@@ -94,7 +94,7 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.ID, user.Username, user.Email, user.Password, user.CreatedAt, user.UpdatedAt)
+	_, err = statement.Exec(user.ID, user.Avatar, user.Username, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -103,7 +103,7 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 }
 
 func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error) {
-	query := `UPDATE users SET username = ?, email = ?, password = ?, updated_at = ? WHERE id = ?`
+	query := `UPDATE users SET username = ?, email = ?, password = ?, name = ?, phone = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL`
 
 	statement, err := ur.db.Prepare(query)
 	if err != nil {
@@ -112,7 +112,7 @@ func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.Username, user.Email, user.Password, user.UpdatedAt, user.ID)
+	_, err = statement.Exec(user.Username, user.Email, user.Password, user.Name, user.Phone, user.UpdatedAt, user.ID)
 	if err != nil {
 		return user, err
 	}
