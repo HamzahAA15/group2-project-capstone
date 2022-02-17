@@ -50,10 +50,14 @@ func (us *userService) GetUser(id string) (userEntities.User, error) {
 func (us *userService) CreateUser(input userRequest.CreateUserInput) (userEntities.User, error) {
 	user := userEntities.User{}
 	user.ID = uuid.New().String()
+	user.Avatar = "https://drive.google.com/file/d/1LUJXozBG_pAiGHNVM2tYgYyYxUH3knf-"
 	user.Username = input.Username
 	user.Email = input.Email
 	passwordHash, _ := validation.HashPassword(input.Password)
 	user.Password = passwordHash
+	user.Name = input.Name
+	user.Phone = input.Phone
+	user.Role = input.Role
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
@@ -71,7 +75,8 @@ func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) 
 	user.Email = input.Email
 	passwordHash, _ := validation.HashPassword(input.Password)
 	user.Password = passwordHash
-	user.CreatedAt = time.Now()
+	user.Name = input.Name
+	user.Phone = input.Phone
 	user.UpdatedAt = time.Now()
 
 	updateUser, err := us.userRepository.UpdateUser(user)
