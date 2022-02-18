@@ -38,7 +38,7 @@ func (ur *userRepo) CheckEmail(userChecked userEntities.User) (userEntities.User
 }
 
 func (ur *userRepo) Login(identity string) (userEntities.User, error) {
-	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE username = ? OR email = ?`, identity, identity)
+	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE username = ? OR email = ? AND deleted_at IS NULL`, identity, identity)
 
 	var user userEntities.User
 
