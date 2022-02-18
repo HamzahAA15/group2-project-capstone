@@ -11,9 +11,9 @@ import (
 	_routes "sirclo/project-capstone/router"
 	"syscall"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -42,16 +42,15 @@ func main() {
 		userRepo,
 	)
 
-	corsOptions := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedHeaders: []string{"Authorization", "Content-Type"},
-	})
+	// http.Handle("/", accessControl(router))
+	credentials := handlers.AllowCredentials()
+	origins := handlers.AllowedOrigins([]string{"*"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 
-	router.Use(corsOptions.Handler)
 	errs := make(chan error, 2)
 	go func() {
 		fmt.Println("Listening on port : ", httpPort())
-		errs <- http.ListenAndServe(httpPort(), nil)
+		errs <- http.ListenAndServe(httpPort(), handlers.CORS(credentials, methods, origins)(router))
 	}()
 
 	go func() {
