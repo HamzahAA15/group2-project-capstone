@@ -27,11 +27,12 @@ type UserFormatter struct {
 
 func FormatUser(user userEntities.User) UserFormatter {
 	formatter := UserFormatter{
-		ID:     user.ID,
-		Avatar: user.Avatar,
-		Email:  user.Email,
-		Name:   user.Name,
-		Phone:  user.Phone,
+		ID:       user.ID,
+		Avatar:   user.Avatar,
+		Username: user.Username,
+		Email:    user.Email,
+		Name:     user.Name,
+		Phone:    user.Phone,
 	}
 
 	return formatter
