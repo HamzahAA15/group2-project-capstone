@@ -8,12 +8,15 @@ import (
 	"os"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
+	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/userRequest"
+	"sirclo/project-capstone/utils/response/userResponse"
 	"sirclo/project-capstone/utils/upload"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+
 	"github.com/gorilla/mux"
 )
 
@@ -31,40 +34,58 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input userRequest.LoginUserInput
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error"))
+		response, _ := json.Marshal(utils.APIResponse("Login Failed", http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
 	}
 
 	user, err_login := uh.userService.LoginUserService(input)
 	if err_login != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("user not found"))
+		response, _ := json.Marshal(utils.APIResponse("Login Failed", http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
 	}
 	token, err_token := middleware.GenerateToken(user.ID)
 	if err_token != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("failed to generate token"))
+		response, _ := json.Marshal(utils.APIResponse("Failed to Generate Token", http.StatusBadRequest, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(token))
+	formatter := userResponse.FormatAuth(token)
+	response, _ := json.Marshal(utils.APIResponse("Success Generate Token", http.StatusOK, true, formatter))
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
 }
 
 func (uh *userHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	users, err := uh.userService.GetUsers()
 	switch {
 	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-
-		response, _ := json.Marshal(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		var data []userResponse.UserFormatter
+		for i := 0; i < len(users); i++ {
+			formatter := userResponse.FormatUser(users[i])
+			data = append(data, formatter)
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Success Get Users Data", http.StatusOK, true, data))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
-		response, _ := json.Marshal(users)
 		w.Write(response)
 	}
 }
@@ -76,22 +97,23 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := uh.userService.GetUser(id)
 	switch {
 	case err == sql.ErrNoRows: //check data is null?
+		response, _ := json.Marshal(utils.APIResponse("Data Not Found", http.StatusNotFound, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-
-		response, _ := json.Marshal(http.StatusNotFound)
 		w.Write(response)
 	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-
-		response, _ := json.Marshal(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		formatter := userResponse.FormatUser(user)
+		response, _ := json.Marshal(utils.APIResponse("Success Get User By ID", http.StatusOK, true, formatter))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
-		response, _ := json.Marshal(user)
 		w.Write(response)
 	}
 }
@@ -101,19 +123,20 @@ func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&input)
 
-	user, err := uh.userService.CreateUser(input)
+	userCreate, err := uh.userService.CreateUser(input)
 	switch {
 	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-
-		response, _ := json.Marshal(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		formatter := userResponse.FormatUser(userCreate)
+		response, _ := json.Marshal(utils.APIResponse("Success Create User Data", http.StatusOK, true, formatter))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
-		response, _ := json.Marshal(user)
 		w.Write(response)
 	}
 }
@@ -130,16 +153,17 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
 	switch {
 	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-
-		response, _ := json.Marshal(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		formatter := userResponse.FormatUser(userUpdate)
+		response, _ := json.Marshal(utils.APIResponse("Success Update User Data", http.StatusOK, true, formatter))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
-		response, _ := json.Marshal(userUpdate)
 		w.Write(response)
 	}
 }
@@ -151,16 +175,16 @@ func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request)
 	err := uh.userService.DeleteUser(user.ID)
 	switch {
 	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-
-		response, _ := json.Marshal(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		response, _ := json.Marshal(utils.APIResponse("Success Delete User Data", http.StatusOK, true, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-
-		response, _ := json.Marshal(http.StatusOK)
 		w.Write(response)
 	}
 }
@@ -172,19 +196,22 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 
 	err := r.ParseMultipartForm(maxSize)
 	if err != nil {
+		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v", maxSize), http.StatusUnprocessableEntity, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte(fmt.Sprintf("Image too large. Max Size: %v", maxSize)))
-		return
+		w.Write(response)
 	}
 
 	file, fileHeader, err := r.FormFile("avatar")
 	if err != nil {
+		response, _ := json.Marshal(utils.APIResponse("Could not get uploaded file", http.StatusBadRequest, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Could not get uploaded file"))
-		return
+		w.Write(response)
 	}
+
 	defer file.Close()
 
 	s, err := session.NewSession(&aws.Config{
@@ -195,29 +222,34 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 			""),
 	})
 	if err != nil {
+		response, _ := json.Marshal(utils.APIResponse("Could not uploaded file", http.StatusBadRequest, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadGateway)
-		response, _ := json.Marshal(http.StatusBadGateway)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(response)
-		return
 	}
 
 	fileLoc, err := upload.UploadFile(user.ID, "users", s, file, fileHeader)
 	if err != nil {
+		response, _ := json.Marshal(utils.APIResponse("file extension isn't equal to .png, .jpg. and .jpeg", http.StatusBadRequest, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadGateway)
-		w.Write([]byte("file extension isn't equal to .png, .jpg. and .jpeg"))
-		return
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response)
 	}
 
 	err_upload := uh.userService.UploadAvatarUser(user.ID, fileLoc)
 	if err_upload != nil {
+		response, _ := json.Marshal(utils.APIResponse("failed to upload photo", http.StatusInternalServerError, false, nil))
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to upload photo"))
-		return
+		w.Write(response)
 	}
+
+	response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Image uploaded successfully: %v", fileLoc)))
+	w.Write(response)
 }
