@@ -39,6 +39,7 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
+		return
 	}
 
 	user, err_login := uh.userService.LoginUserService(input)
@@ -48,6 +49,7 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
+		return
 	}
 	token, err_token := middleware.GenerateToken(user.ID)
 	if err_token != nil {
@@ -56,6 +58,7 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(response)
+		return
 	}
 
 	formatter := userResponse.FormatAuth(token)
