@@ -13,6 +13,8 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.43.0 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 )
 

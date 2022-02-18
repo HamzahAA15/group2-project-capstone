@@ -11,6 +11,7 @@ import (
 	_routes "sirclo/project-capstone/router"
 	"syscall"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -41,12 +42,15 @@ func main() {
 		userRepo,
 	)
 
-	http.Handle("/", accessControl(router))
+	// http.Handle("/", accessControl(router))
+	credentials := handlers.AllowCredentials()
+	origins := handlers.AllowedOrigins([]string{"*"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
 
 	errs := make(chan error, 2)
 	go func() {
 		fmt.Println("Listening on port : ", httpPort())
-		errs <- http.ListenAndServe(httpPort(), nil)
+		errs <- http.ListenAndServe(httpPort(), handlers.CORS(credentials, methods, origins)(router))
 	}()
 
 	go func() {
@@ -56,20 +60,6 @@ func main() {
 	}()
 
 	fmt.Printf("terminated %s", <-errs)
-}
-
-//CORS
-func accessControl(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token"
-		allowedMethods := "GET, POST, PUT, DELETE"
-
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", allowedHeaders)
-		w.Header().Set("Access-Control-Allow-Methods", allowedMethods)
-
-		h.ServeHTTP(w, r)
-	})
 }
 
 //PORT
