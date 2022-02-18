@@ -36,7 +36,7 @@ func UploadFile(filename string, path string, s *session.Session, file multipart
 		Body: bytes.NewReader(buffer),
 		// ContentLength:        aws.Int64(int64(size)),
 		ContentType:          aws.String(http.DetectContentType(buffer)),
-		ContentDisposition:   aws.String("attachment"),
+		ContentDisposition:   aws.String("inline"),
 		ServerSideEncryption: aws.String("AES256"),
 		StorageClass:         aws.String("INTELLIGENT_TIERING"),
 	})
