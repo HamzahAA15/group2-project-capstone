@@ -45,7 +45,7 @@ func main() {
 	// http.Handle("/", accessControl(router))
 	credentials := handlers.AllowCredentials()
 	origins := handlers.AllowedOrigins([]string{"*"})
-	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
+	methods := handlers.AllowedMethods([]string{"*"})
 
 	errs := make(chan error, 2)
 	go func() {
