@@ -204,6 +204,7 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
+		return
 	}
 
 	file, fileHeader, err := r.FormFile("avatar")
@@ -213,6 +214,7 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(response)
+		return
 	}
 
 	defer file.Close()
@@ -230,6 +232,7 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(response)
+		return
 	}
 
 	fileLoc, err := upload.UploadFile(user.ID, "users", s, file, fileHeader)
@@ -239,6 +242,7 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(response)
+		return
 	}
 
 	err_upload := uh.userService.UploadAvatarUser(user.ID, fileLoc)
@@ -248,6 +252,7 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
+		return
 	}
 
 	response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
