@@ -47,8 +47,8 @@ func main() {
 	// origins := handlers.AllowedOrigins([]string{"*"})
 	// methods := handlers.AllowedMethods([]string{"*"})
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"}, // All origins
-		AllowedMethods: []string{"*"}, // Allowing only get, just an example
+		AllowedOrigins: []string{"*"},                                      // All origins
+		AllowedMethods: []string{"GET", "PUT", "POST", "DELETE", "OPTION"}, // Allowing only get, just an example
 	})
 	http.Handle("/", router)
 
