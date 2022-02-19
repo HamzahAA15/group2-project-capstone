@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"sirclo/project-capstone/database"
+	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	_routes "sirclo/project-capstone/router"
 	"syscall"
@@ -24,6 +25,7 @@ func main() {
 
 	var router = mux.NewRouter()
 	var userRepo userRepository.UserRepoInterface
+	var officeRepo officeRepository.OfficeRepoInterface
 
 	dbMysql := database.MySQLConnection(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=%s&loc=%s",
 		os.Getenv("mysqlUser"),
@@ -37,9 +39,11 @@ func main() {
 	defer dbMysql.Close()
 
 	userRepo = userRepository.NewMySQLUserRepository(dbMysql)
+	officeRepo = officeRepository.NewMySQLOfficeRepository(dbMysql)
 
 	router = _routes.Routes(
 		userRepo,
+		officeRepo,
 	)
 
 	// http.Handle("/", accessControl(router))
