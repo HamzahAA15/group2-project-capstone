@@ -16,8 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-
-	"github.com/gorilla/mux"
 )
 
 type userHandler struct {
@@ -94,10 +92,10 @@ func (uh *userHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
 
-	user, err := uh.userService.GetUser(id)
+	getUser, err := uh.userService.GetUser(user.ID)
 	switch {
 	case err == sql.ErrNoRows: //check data is null?
 		response, _ := json.Marshal(utils.APIResponse("Data Not Found", http.StatusNotFound, false, nil))
@@ -112,7 +110,7 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
-		formatter := userResponse.FormatUser(user)
+		formatter := userResponse.FormatUser(getUser)
 		response, _ := json.Marshal(utils.APIResponse("Success Get User By ID", http.StatusOK, true, formatter))
 
 		w.Header().Set("Content-Type", "application/json")
