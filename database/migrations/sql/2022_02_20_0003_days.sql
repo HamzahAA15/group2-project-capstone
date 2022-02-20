@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS days;
+
+CREATE TABLE days (
+	id VARCHAR(50) PRIMARY KEY,
+	office_id VARCHAR(50) NOT NULL,
+	date TIMESTAMP NOT NULL,
+	quota INT NOT NULL,
+	created_at TIMESTAMP DEFAULT now(),
+	updated_at TIMESTAMP DEFAULT now(),
+	FOREIGN KEY (office_id) REFERENCES offices(id)
+);
