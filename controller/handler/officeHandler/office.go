@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sirclo/project-capstone/controller/service/officeService"
 	"sirclo/project-capstone/utils"
+	"sirclo/project-capstone/utils/response/officeResponse"
 )
 
 type officeHandler struct {
@@ -27,7 +28,13 @@ func (uh *officeHandler) GetOfficesHandler(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
-		response, _ := json.Marshal(utils.APIResponse("Success Get Offices Data", http.StatusOK, true, offices))
+		var data []officeResponse.OfficeResponse
+		for i := 0; i < len(offices); i++ {
+			formatter := officeResponse.FormatOffice(offices[i])
+			data = append(data, formatter)
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Success Get Offices Data", http.StatusOK, true, data))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
