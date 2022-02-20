@@ -38,7 +38,7 @@ func (ur *userRepo) CheckEmail(userChecked userEntities.User) (userEntities.User
 }
 
 func (ur *userRepo) Login(identity string) (userEntities.User, error) {
-	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE username = ? OR email = ? AND deleted_at IS NULL`, identity, identity)
+	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE nik = ? OR email = ? AND deleted_at IS NULL`, identity, identity)
 
 	var user userEntities.User
 
@@ -53,7 +53,7 @@ func (ur *userRepo) Login(identity string) (userEntities.User, error) {
 func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 	var users []userEntities.User
 
-	result, err := ur.db.Query(`SELECT id, avatar, username, email, name, phone, role, created_at FROM users WHERE deleted_at IS NULL`)
+	result, err := ur.db.Query(`SELECT id, avatar, nik, email, name, phone, role, created_at FROM users WHERE deleted_at IS NULL`)
 	if err != nil {
 		return users, err
 	}
@@ -61,7 +61,7 @@ func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 	for result.Next() {
 		var user userEntities.User
 
-		err = result.Scan(&user.ID, &user.Avatar, &user.Username, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
+		err = result.Scan(&user.ID, &user.Avatar, &user.Nik, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
 		if err != nil {
 			return users, err
 		}
@@ -74,9 +74,9 @@ func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
 func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	var user userEntities.User
 
-	row := ur.db.QueryRow(`SELECT id, avatar, username, email, name, phone, role, created_at FROM users WHERE id = ? AND deleted_at IS NULL`, id)
+	row := ur.db.QueryRow(`SELECT id, avatar, nik, email, name, phone, role, created_at FROM users WHERE id = ? AND deleted_at IS NULL`, id)
 
-	err := row.Scan(&user.ID, &user.Avatar, &user.Username, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
+	err := row.Scan(&user.ID, &user.Avatar, &user.Nik, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -85,7 +85,7 @@ func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 }
 
 func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error) {
-	query := `INSERT INTO users (id, avatar, username, email, password, name, phone, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (id, avatar, nik, email, password, name, phone, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	statement, err := ur.db.Prepare(query)
 	if err != nil {
@@ -94,7 +94,7 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.ID, user.Avatar, user.Username, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)
+	_, err = statement.Exec(user.ID, user.Avatar, user.Nik, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -103,7 +103,7 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 }
 
 func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error) {
-	query := `UPDATE users SET username = ?, email = ?, password = ?, name = ?, phone = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL`
+	query := `UPDATE users SET nik = ?, email = ?, password = ?, name = ?, phone = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL`
 
 	statement, err := ur.db.Prepare(query)
 	if err != nil {
@@ -112,7 +112,7 @@ func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.Username, user.Email, user.Password, user.Name, user.Phone, user.UpdatedAt, user.ID)
+	_, err = statement.Exec(user.Nik, user.Email, user.Password, user.Name, user.Phone, user.UpdatedAt, user.ID)
 	if err != nil {
 		return user, err
 	}

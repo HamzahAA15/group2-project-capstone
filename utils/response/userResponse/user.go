@@ -17,22 +17,22 @@ func FormatAuth(token string) AuthFormatter {
 }
 
 type UserFormatter struct {
-	ID       string `json:"id"`
-	Avatar   string `json:"avatar"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Name     string `json:"name"`
-	Phone    string `json:"phone"`
+	ID     string `json:"id"`
+	Avatar string `json:"avatar"`
+	Nik    string `json:"nik"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Phone  string `json:"phone"`
 }
 
 func FormatUser(user userEntities.User) UserFormatter {
 	formatter := UserFormatter{
-		ID:       user.ID,
-		Avatar:   user.Avatar,
-		Username: user.Username,
-		Email:    user.Email,
-		Name:     user.Name,
-		Phone:    user.Phone,
+		ID:     user.ID,
+		Avatar: user.Avatar,
+		Nik:    user.Nik,
+		Email:  user.Email,
+		Name:   user.Name,
+		Phone:  user.Phone,
 	}
 
 	return formatter
