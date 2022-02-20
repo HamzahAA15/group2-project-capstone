@@ -6,7 +6,7 @@ type User struct {
 	ID        string
 	Avatar    string
 	Name      string
-	Username  string
+	Nik       string
 	Email     string
 	Password  string
 	Phone     string

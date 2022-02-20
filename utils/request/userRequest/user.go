@@ -2,7 +2,7 @@ package userRequest
 
 type CreateUserInput struct {
 	ID       string `json:"id" form:"id"`
-	Username string `json:"username" form:"username"`
+	Nik      string `json:"nik" form:"nik"`
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 	Name     string `json:"name" form:"name"`
@@ -11,7 +11,7 @@ type CreateUserInput struct {
 }
 
 type UpdateUserInput struct {
-	Username string `json:"username" form:"username"`
+	Nik      string `json:"nik" form:"nik"`
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 	Name     string `json:"name" form:"name"`
