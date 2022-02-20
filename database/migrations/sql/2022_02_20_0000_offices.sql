@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS offices;
+
+CREATE TABLE offices (
+	id VARCHAR(50) PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	created_at TIMESTAMP DEFAULT now(),
+	updated_at TIMESTAMP DEFAULT now()
+);
