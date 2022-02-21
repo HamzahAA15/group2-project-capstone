@@ -26,7 +26,11 @@ func (dr *dayRepo) GetDays() ([]dayEntities.Day, error) {
 	for result.Next() {
 		var day dayEntities.Day
 
+<<<<<<< HEAD
 		errScan := result.Scan(&day.ID, &day.OfficeId, &day.Date, &day.Quota)
+=======
+		errScan := result.Scan(&day.ID, &day.OfficeId, &day.Quota)
+>>>>>>> e8058af (get all days repo)
 		if errScan != nil {
 			return days, errScan
 		}
