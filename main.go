@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"sirclo/project-capstone/database"
+	"sirclo/project-capstone/repository/dayRepository"
 	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	_routes "sirclo/project-capstone/router"
@@ -26,6 +27,7 @@ func main() {
 	var router = mux.NewRouter()
 	var userRepo userRepository.UserRepoInterface
 	var officeRepo officeRepository.OfficeRepoInterface
+	var dayRepo dayRepository.DayRepoInterface
 
 	dbMysql := database.MySQLConnection(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=%s&loc=%s",
 		os.Getenv("mysqlUser"),
@@ -44,6 +46,7 @@ func main() {
 	router = _routes.Routes(
 		userRepo,
 		officeRepo,
+		dayRepo,
 	)
 
 	// http.Handle("/", accessControl(router))
