@@ -42,6 +42,7 @@ func main() {
 
 	userRepo = userRepository.NewMySQLUserRepository(dbMysql)
 	officeRepo = officeRepository.NewMySQLOfficeRepository(dbMysql)
+	dayRepo = dayRepository.NewMySQLDayRepository(dbMysql)
 
 	router = _routes.Routes(
 		userRepo,
