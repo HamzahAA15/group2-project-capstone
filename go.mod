@@ -12,9 +12,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.43.0 // indirect
-	github.com/felixge/httpsnoop v1.0.1 // indirect
-	github.com/gorilla/handlers v1.5.1 // indirect
+	github.com/aws/aws-sdk-go v1.43.0
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 )
 
@@ -22,5 +20,6 @@ require (
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rs/cors v1.8.2
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
