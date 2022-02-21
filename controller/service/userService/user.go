@@ -51,8 +51,8 @@ func (us *userService) GetUser(id string) (userEntities.User, error) {
 func (us *userService) CreateUser(input userRequest.CreateUserInput) (userEntities.User, error) {
 	user := userEntities.User{}
 	user.ID = uuid.New().String()
-	user.Avatar = "https://drive.google.com/file/d/1LUJXozBG_pAiGHNVM2tYgYyYxUH3knf-"
-	user.Username = input.Username
+	user.Avatar = fmt.Sprintf("https://ui-avatars.com/api/?name=%s", input.Name)
+	user.Nik = input.Nik
 	user.Email = input.Email
 	passwordHash, _ := validation.HashPassword(input.Password)
 	user.Password = passwordHash
@@ -72,7 +72,7 @@ func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) 
 		return user, err
 	}
 
-	user.Username = input.Username
+	user.Nik = input.Nik
 	user.Email = input.Email
 	passwordHash, _ := validation.HashPassword(input.Password)
 	user.Password = passwordHash

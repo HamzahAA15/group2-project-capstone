@@ -20,9 +20,9 @@ func (ur UserResource) UserRoute(userRepo userRepository.UserRepoInterface) *mux
 	router.HandleFunc("/login", userHandler.Login).Methods("POST")
 	router.HandleFunc("/register", userHandler.CreateUserHandler).Methods("POST")
 	router.HandleFunc("/", userHandler.GetUsersHandler).Methods("GET")
-	router.HandleFunc("/{id}", userHandler.GetUserHandler).Methods("GET")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(userHandler.UpdateUserHandler))).Methods("PUT")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(userHandler.DeleteUserHandler))).Methods("DELETE")
+	router.Handle("/profile", middleware.Authentication(http.HandlerFunc(userHandler.GetUserHandler))).Methods("GET")
 	router.Handle("/avatar", middleware.Authentication(http.HandlerFunc(userHandler.UploadFileHandler))).Methods("POST")
 	return router
 }
