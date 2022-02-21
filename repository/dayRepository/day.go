@@ -34,3 +34,8 @@ func (dr *dayRepo) GetDays() ([]dayEntities.Day, error) {
 	}
 	return days, nil
 }
+
+func (dr *dayRepo) UpdateDay(dayId string) (dayEntities.Day, error) {
+	var day dayEntities.Day
+	return day, nil
+}
