@@ -28,10 +28,8 @@ func (cr *certificateRepo) GetCertificates(officeID string) ([]certificateEntiti
 		users AS user ON user.id = certificates.user_id
 	LEFT JOIN
 		users AS admin ON admin.id = certificates.admin_id
-	WHERE
-		admin.office_id = ? AND user.office_id = ?
 	ORDER BY 
-		certificates.updated_at DESC`, officeID, officeID)
+		certificates.updated_at DESC`)
 	if err != nil {
 		return certificates, err
 	}
