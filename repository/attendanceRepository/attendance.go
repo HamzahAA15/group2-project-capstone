@@ -9,7 +9,7 @@ type attendanceRepo struct {
 	db *sql.DB
 }
 
-func NewMySQLDayRepository(db *sql.DB) attendanceRepoInterface {
+func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 	return &attendanceRepo{
 		db: db,
 	}
