@@ -59,7 +59,7 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	formatter := userResponse.FormatAuth(token)
+	formatter := userResponse.FormatAuth(token, user.Role)
 	response, _ := json.Marshal(utils.APIResponse("Success Generate Token", http.StatusOK, true, formatter))
 
 	w.Header().Set("Content-Type", "application/json")
