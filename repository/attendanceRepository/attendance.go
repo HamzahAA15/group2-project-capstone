@@ -29,3 +29,18 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 	}
 	return att, nil
 }
+
+func (ar *attendanceRepo) UpdateAttendance(att attendanceEntities.Attendance) (attendanceEntities.Attendance, error) {
+	query := `UPDATE attendances SET status = ?, notes = ?, admin_id = ?, updated_at = now() WHERE id = ?`
+
+	statement, err := ar.db.Prepare(query)
+	if err != nil {
+		return att, err
+	}
+
+	_, errExec := statement.Exec(att.Status, att.Notes, att.Admin.ID, att.Day.ID)
+	if errExec != nil {
+		return att, errExec
+	}
+	return att, nil
+}
