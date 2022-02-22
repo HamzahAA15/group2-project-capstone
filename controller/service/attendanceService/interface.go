@@ -7,4 +7,6 @@ import (
 
 type AttServiceInterface interface {
 	CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error)
+	UpdateAttendance(loginId string, input attendanceRequest.UpdateAttRequest) (attendanceEntities.Attendance, error)
+	CheckUserRole(loginId string) string
 }
