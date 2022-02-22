@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"sirclo/project-capstone/database"
+	"sirclo/project-capstone/repository/certificateRepository"
 	"sirclo/project-capstone/repository/dayRepository"
 	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
@@ -28,6 +29,7 @@ func main() {
 	var userRepo userRepository.UserRepoInterface
 	var officeRepo officeRepository.OfficeRepoInterface
 	var dayRepo dayRepository.DayRepoInterface
+	var certificateRepo certificateRepository.CertificateInterface
 
 	dbMysql := database.MySQLConnection(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=%s&loc=%s",
 		os.Getenv("mysqlUser"),
@@ -42,11 +44,13 @@ func main() {
 
 	userRepo = userRepository.NewMySQLUserRepository(dbMysql)
 	officeRepo = officeRepository.NewMySQLOfficeRepository(dbMysql)
+	certificateRepo = certificateRepository.NewMySQLCertificateRepository(dbMysql)
 	dayRepo = dayRepository.NewMySQLDayRepository(dbMysql)
 
 	router = _routes.Routes(
 		userRepo,
 		officeRepo,
+		certificateRepo,
 		dayRepo,
 	)
 
@@ -54,6 +58,7 @@ func main() {
 	// credentials := handlers.AllowCredentials()
 	// origins := handlers.AllowedOrigins([]string{"*"})
 	// methods := handlers.AllowedMethods([]string{"*"})
+
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},                                       // All origins
 		AllowedMethods: []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"}, // Allowing only get, just an example
