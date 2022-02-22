@@ -38,7 +38,7 @@ func (ar *attendanceRepo) UpdateAttendance(att attendanceEntities.Attendance) (a
 		return att, err
 	}
 
-	_, errExec := statement.Exec(att.Status, att.Notes, att.Admin.ID, att.Day.ID)
+	_, errExec := statement.Exec(att.Status, att.Notes, att.Admin.ID, att.ID)
 	if errExec != nil {
 		return att, errExec
 	}
