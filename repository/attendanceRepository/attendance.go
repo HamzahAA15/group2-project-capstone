@@ -23,7 +23,7 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 		return att, err
 	}
 
-	_, errExec := statement.Exec(att.ID, att.Day.ID, att.Employee.ID, att.Status, att.Notes, att.CreatedAt)
+	_, errExec := statement.Exec(att.ID, att.Day.ID, att.Employee.ID)
 	if errExec != nil {
 		return att, errExec
 	}
