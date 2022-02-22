@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/signal"
 	"sirclo/project-capstone/database"
+	"sirclo/project-capstone/repository/attendanceRepository"
 	"sirclo/project-capstone/repository/certificateRepository"
+	"sirclo/project-capstone/repository/checkInOutRepository"
 	"sirclo/project-capstone/repository/dayRepository"
 	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
@@ -30,6 +32,11 @@ func main() {
 	var officeRepo officeRepository.OfficeRepoInterface
 	var dayRepo dayRepository.DayRepoInterface
 	var certificateRepo certificateRepository.CertificateInterface
+<<<<<<< HEAD
+	var attRepo attendanceRepository.AttendanceRepoInterface
+=======
+	var checkinsRepo checkInOutRepository.CheckInOutRepoInterface
+>>>>>>> cfc3fd7f90a6c2634d572f7a01e7fcee20630ab6
 
 	dbMysql := database.MySQLConnection(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=%s&loc=%s",
 		os.Getenv("mysqlUser"),
@@ -46,12 +53,22 @@ func main() {
 	officeRepo = officeRepository.NewMySQLOfficeRepository(dbMysql)
 	certificateRepo = certificateRepository.NewMySQLCertificateRepository(dbMysql)
 	dayRepo = dayRepository.NewMySQLDayRepository(dbMysql)
+<<<<<<< HEAD
+	attRepo = attendanceRepository.NewMySQLDayRepository(dbMysql)
+=======
+	checkinsRepo = checkInOutRepository.NewMySQLCheckInOutRepository(dbMysql)
+>>>>>>> cfc3fd7f90a6c2634d572f7a01e7fcee20630ab6
 
 	router = _routes.Routes(
 		userRepo,
 		officeRepo,
 		certificateRepo,
 		dayRepo,
+<<<<<<< HEAD
+		attRepo,
+=======
+		checkinsRepo,
+>>>>>>> cfc3fd7f90a6c2634d572f7a01e7fcee20630ab6
 	)
 
 	// http.Handle("/", accessControl(router))
