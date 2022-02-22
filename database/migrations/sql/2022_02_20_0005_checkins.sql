@@ -4,7 +4,9 @@ CREATE TABLE checkins (
 	id VARCHAR(50) PRIMARY KEY,
 	attendance_id VARCHAR(50) NOT NULL,
     temprature FLOAT NOT NULL,
-	checkin_time TIMESTAMP DEFAULT now() NOT NULL,
-	checkout_time TIMESTAMP DEFAULT NULL,
+	is_checkins BOOLEAN DEFAULT TRUE NOT NULL,
+	is_checkouts BOOLEAN DEFAULT FALSE NOT NULL,
+	created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+	updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
 	FOREIGN KEY (attendance_id) REFERENCES attendances(id)
 );
