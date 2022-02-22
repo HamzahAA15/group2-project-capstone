@@ -6,4 +6,5 @@ import (
 
 type CheckinoutServiceInterface interface {
 	Gets() ([]checkinEntities.Checkin, error)
+	GetByUser(userID string) ([]checkinEntities.Checkin, error)
 }
