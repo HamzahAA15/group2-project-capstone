@@ -2,21 +2,24 @@ package dayHandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/dayService"
+	"sirclo/project-capstone/controller/service/userService"
+	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/dayRequest"
 	"sirclo/project-capstone/utils/response/dayResponse"
 )
 
 type dayHandler struct {
-	dayService dayService.DayServiceInterface
+	dayService  dayService.DayServiceInterface
+	userService userService.UserServiceInterface
 }
 
-func NewDayHandler(dayService dayService.DayServiceInterface) DayHandlerInterface {
+func NewDayHandler(dayService dayService.DayServiceInterface, userService userService.UserServiceInterface) DayHandlerInterface {
 	return &dayHandler{
-		dayService: dayService,
+		dayService:  dayService,
+		userService: userService,
 	}
 }
 
@@ -46,12 +49,24 @@ func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
+
+	checkUserRole := dh.dayService.CheckUserRole(user.ID)
+	if checkUserRole != "admin" {
+		response, _ := json.Marshal(utils.APIResponse("You are not admin", http.StatusUnauthorized, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(response)
+		return
+	}
+
 	var input dayRequest.DayUpdateRequest
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&input)
 
 	dayUpdate, err := dh.dayService.UpdateDays(input)
-	fmt.Println("DU & err: ", dayUpdate, err)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
