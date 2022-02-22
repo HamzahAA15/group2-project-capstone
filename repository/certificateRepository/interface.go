@@ -3,5 +3,5 @@ package certificateRepository
 import "sirclo/project-capstone/entities/certificateEntities"
 
 type CertificateInterface interface {
-	GetCertificates() ([]certificateEntities.Certificate, error)
+	GetCertificates(officeID string) ([]certificateEntities.Certificate, error)
 }

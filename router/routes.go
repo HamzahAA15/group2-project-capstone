@@ -25,7 +25,7 @@ func Routes(
 	mount(router, "/users", userRouter.UserResource{}.UserRoute(userRepo))
 	mount(router, "/offices", officeRouter.OfficeResource{}.OfficeRoute(officeRepo))
 	mount(router, "/days", dayRouter.DayResource{}.DayRoute(dayRepo))
-	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo))
+	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo, userRepo))
 
 	return router
 }

@@ -15,7 +15,7 @@ func NewCertificateService(repo certificateRepository.CertificateInterface) Cert
 	}
 }
 
-func (cs *certificateService) GetCertificates() ([]certificateEntities.Certificate, error) {
-	certificates, err := cs.certificateRepository.GetCertificates()
+func (cs *certificateService) GetCertificates(officeID string) ([]certificateEntities.Certificate, error) {
+	certificates, err := cs.certificateRepository.GetCertificates(officeID)
 	return certificates, err
 }

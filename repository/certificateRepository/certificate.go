@@ -15,7 +15,7 @@ func NewMySQLCertificateRepository(db *sql.DB) CertificateInterface {
 	}
 }
 
-func (cr *certificateRepo) GetCertificates() ([]certificateEntities.Certificate, error) {
+func (cr *certificateRepo) GetCertificates(officeID string) ([]certificateEntities.Certificate, error) {
 	var certificates []certificateEntities.Certificate
 
 	result, err := cr.db.Query(`
@@ -28,8 +28,10 @@ func (cr *certificateRepo) GetCertificates() ([]certificateEntities.Certificate,
 		users AS user ON user.id = certificates.user_id
 	LEFT JOIN
 		users AS admin ON admin.id = certificates.admin_id
+	WHERE
+		admin.office_id = ? AND user.office_id = ?
 	ORDER BY 
-		certificates.updated_at DESC`)
+		certificates.updated_at DESC`, officeID, officeID)
 	if err != nil {
 		return certificates, err
 	}
