@@ -19,3 +19,8 @@ func (cs *certificateService) GetCertificates(officeID string) ([]certificateEnt
 	certificates, err := cs.certificateRepository.GetCertificates(officeID)
 	return certificates, err
 }
+
+func (cs *certificateService) GetCertificateUser(userID string) ([]certificateEntities.Certificate, error) {
+	certificates, err := cs.certificateRepository.GetCertificateUser(userID)
+	return certificates, err
+}

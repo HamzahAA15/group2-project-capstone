@@ -59,3 +59,30 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 	}
 
 }
+
+func (ch *certificateHandler) GetCertificateUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.ForContext(ctx).ID
+
+	certificates, err := ch.certificateService.GetCertificateUser(userID)
+	switch {
+	case err != nil:
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	default:
+		var data []certificateResponse.CertificateResponse
+		for _, val := range certificates {
+			dayFormatter := certificateResponse.FormatCertificate(val)
+			data = append(data, dayFormatter)
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Success Get Certificates Data", http.StatusOK, true, data))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+}
