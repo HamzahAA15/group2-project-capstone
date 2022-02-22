@@ -24,7 +24,7 @@ func Routes(
 	router := mux.NewRouter().StrictSlash(true)
 	mount(router, "/users", userRouter.UserResource{}.UserRoute(userRepo))
 	mount(router, "/offices", officeRouter.OfficeResource{}.OfficeRoute(officeRepo))
-	mount(router, "/days", dayRouter.DayResource{}.DayRoute(dayRepo))
+	mount(router, "/days", dayRouter.DayResource{}.DayRoute(dayRepo, userRepo))
 	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo, userRepo))
 
 	return router
