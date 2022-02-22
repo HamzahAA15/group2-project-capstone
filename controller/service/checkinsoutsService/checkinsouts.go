@@ -19,3 +19,8 @@ func (cs *checkinoutService) Gets() ([]checkinEntities.Checkin, error) {
 	checkinsout, err := cs.checkinoutRepository.Gets()
 	return checkinsout, err
 }
+
+func (cs *checkinoutService) GetByUser(userID string) ([]checkinEntities.Checkin, error) {
+	checkinsout, err := cs.checkinoutRepository.GetByUser(userID)
+	return checkinsout, err
+}
