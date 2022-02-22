@@ -6,11 +6,13 @@ import (
 
 type AuthFormatter struct {
 	Token string `json:"token"`
+	Role  string `json:"role"`
 }
 
-func FormatAuth(token string) AuthFormatter {
+func FormatAuth(token, role string) AuthFormatter {
 	formatter := AuthFormatter{
 		Token: token,
+		Role:  role,
 	}
 
 	return formatter
