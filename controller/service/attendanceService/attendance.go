@@ -49,10 +49,10 @@ func (as *attendanceService) UpdateAttendance(loginId string, input attendanceRe
 	return updateAttendance, nil
 }
 
-// func (as *attendanceService) CheckUserRole(loginId string) string {
-// 	currentUser, _ := as.userRepository.GetUser(loginId)
-// 	if currentUser.Role != "admin" {
-// 		return currentUser.Role
-// 	}
-// 	return currentUser.Role
-// }
+func (as *attendanceService) CheckUserRole(loginId string) string {
+	currentUser, _ := as.userRepo.GetUser(loginId)
+	if currentUser.Role != "admin" {
+		return currentUser.Role
+	}
+	return currentUser.Role
+}
