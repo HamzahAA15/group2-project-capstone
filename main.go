@@ -54,6 +54,11 @@ func main() {
 		dayRepo,
 	)
 
+	// http.Handle("/", accessControl(router))
+	// credentials := handlers.AllowCredentials()
+	// origins := handlers.AllowedOrigins([]string{"*"})
+	// methods := handlers.AllowedMethods([]string{"*"})
+
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},                                       // All origins
 		AllowedMethods: []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"}, // Allowing only get, just an example
