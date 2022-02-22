@@ -38,11 +38,11 @@ func (ur *userRepo) CheckEmail(userChecked userEntities.User) (userEntities.User
 }
 
 func (ur *userRepo) Login(identity string) (userEntities.User, error) {
-	row := ur.db.QueryRow(`SELECT id, email, password FROM users WHERE nik = ? OR email = ? AND deleted_at IS NULL`, identity, identity)
+	row := ur.db.QueryRow(`SELECT id, email, password, role FROM users WHERE nik = ? OR email = ? AND deleted_at IS NULL`, identity, identity)
 
 	var user userEntities.User
 
-	err := row.Scan(&user.ID, &user.Email, &user.Password)
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		return user, err
 	}
