@@ -8,7 +8,8 @@ import (
 
 type Attendance struct {
 	ID        string
-	Day       dayEntities.Day
+	Day       dayEntities.Days
+	Office    string
 	Employee  userEntities.User
 	Status    string
 	Notes     string
