@@ -21,5 +21,7 @@ func (cr CheckInOutResource) CheckInOutRoute(
 	router := mux.NewRouter()
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(checkInOutHandler.GetsHandler))).Methods("GET")
 	router.Handle("/user", middleware.Authentication(http.HandlerFunc(checkInOutHandler.GetsByUserHandler))).Methods("GET")
+	router.Handle("/ins", middleware.Authentication(http.HandlerFunc(checkInOutHandler.CheckinsHandler))).Methods("POST")
+	router.Handle("/outs", middleware.Authentication(http.HandlerFunc(checkInOutHandler.CheckoutsHandler))).Methods("POST")
 	return router
 }
