@@ -42,3 +42,14 @@ func (cs *checkinoutService) Checkin(input checkInsOutsRequest.CheckInsRequest) 
 	createCheckins, err := cs.checkinoutRepository.CheckIn(checkins)
 	return createCheckins, err
 }
+
+func (cs *checkinoutService) Checkout(userID string, input checkInsOutsRequest.CheckOutsRequest) (checkinEntities.Checkin, error) {
+	checkouts := checkinEntities.Checkin{}
+	checkouts.ID = input.ID
+	checkouts.AttendanceID = input.AttendanceID
+	checkouts.IsCheckOuts = true
+	checkouts.UpdatedAt = time.Now()
+
+	checkOuts, err := cs.checkinoutRepository.CheckOut(userID, checkouts)
+	return checkOuts, err
+}
