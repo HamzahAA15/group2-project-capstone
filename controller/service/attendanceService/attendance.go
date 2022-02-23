@@ -21,6 +21,14 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 	}
 }
 
+func (as *attendanceService) GetAttendances() ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.GetAttendances()
+	if err != nil {
+		return attendances, err
+	}
+	return attendances, nil
+}
+
 func (as *attendanceService) CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error) {
 	var attendance attendanceEntities.Attendance
 	attendance.ID = uuid.New().String()
