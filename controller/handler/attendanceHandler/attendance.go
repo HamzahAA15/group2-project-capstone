@@ -49,3 +49,7 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
+
+}
