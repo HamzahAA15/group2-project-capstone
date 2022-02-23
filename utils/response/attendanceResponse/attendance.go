@@ -1,6 +1,9 @@
 package attendanceResponse
 
-import "sirclo/project-capstone/entities/attendanceEntities"
+import (
+	"sirclo/project-capstone/entities/attendanceEntities"
+	"time"
+)
 
 type AttCreateResponse struct {
 	ID       string `json:"id"`
@@ -16,22 +19,24 @@ type AttUpdateResponse struct {
 }
 
 type AttGetResponse struct {
-	ID       string `json:"id"`
-	Day      string `json:"day"`
-	Employee string `json:"employee"`
-	Status   string `json:"status"`
-	Notes    string `json:"notes"`
-	Admin    string `json:"admin"`
+	ID       string    `json:"id"`
+	Day      time.Time `json:"day"`
+	Office   string    `json:"office"`
+	Employee string    `json:"employee"`
+	Status   string    `json:"status"`
+	Notes    string    `json:"notes"`
+	Admin    string    `json:"admin"`
 }
 
 func FormatGetAtt(att attendanceEntities.Attendance) AttGetResponse {
 	fomatter := AttGetResponse{
 		ID:       att.ID,
-		Day:      att.Day.ID,
-		Employee: att.Employee.ID,
+		Day:      att.Day.Date,
+		Office:   att.Office,
+		Employee: att.Employee.Name,
 		Status:   att.Status,
 		Notes:    att.Notes,
-		Admin:    att.Admin.ID,
+		Admin:    att.Admin.Name,
 	}
 	return fomatter
 }
