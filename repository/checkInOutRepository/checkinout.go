@@ -2,6 +2,7 @@ package checkInOutRepository
 
 import (
 	"database/sql"
+	"errors"
 	"sirclo/project-capstone/entities/checkinEntities"
 )
 
@@ -80,16 +81,6 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 func (cr *checkInOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntities.Checkin, error) {
 	query := `INSERT INTO checkins (id, attendance_id, temprature, is_checkins, is_checkouts, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-	// query, _ := cr.db.Query(`INSERT INTO checkins (id, attendance_id, temprature, is_checkins, is_checkouts, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
-	// SELECT
-	// 	attendances.id, attendances.status
-	// FROM
-	// 	attendances
-	// JOIN
-	// 	checkins ON checkins.attendance_id = attendances.id
-	// WHERE
-	// 	attendances.status = 'approved' AND attendances.id = ?`)
-
 	statement, err := cr.db.Prepare(query)
 	if err != nil {
 		return checkin, err
@@ -101,4 +92,40 @@ func (cr *checkInOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntit
 	}
 
 	return checkin, nil
+}
+
+func (cr *checkInOutRepo) CheckOut(userID string, checkinout checkinEntities.Checkin) (checkinEntities.Checkin, error) {
+	query := `
+	UPDATE
+		checkins
+	SET
+		is_checkouts = ?,
+		updated_at = ?
+	WHERE
+		id = ?
+	AND 
+		attendance_id IN(
+			SELECT
+				id FROM attendances
+			WHERE
+				id = ?
+			AND 
+				user_id = ?)`
+
+	statement, err := cr.db.Prepare(query)
+	if err != nil {
+		return checkinout, err
+	}
+
+	result, errExec := statement.Exec(checkinout.IsCheckOuts, checkinout.UpdatedAt, checkinout.ID, checkinout.AttendanceID, userID)
+	if errExec != nil {
+		return checkinout, errExec
+	}
+
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
+		return checkinout, errors.New("error")
+	}
+
+	return checkinout, nil
 }
