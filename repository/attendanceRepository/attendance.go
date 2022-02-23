@@ -2,7 +2,6 @@ package attendanceRepository
 
 import (
 	"database/sql"
-	"fmt"
 	"sirclo/project-capstone/entities/attendanceEntities"
 )
 
@@ -46,7 +45,6 @@ func (ar *attendanceRepo) GetAttendances() ([]attendanceEntities.Attendance, err
 		}
 		attendances = append(attendances, attendance)
 	}
-	fmt.Println("att repo: ", attendances)
 	return attendances, nil
 }
 
