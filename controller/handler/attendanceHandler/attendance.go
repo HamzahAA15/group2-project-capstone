@@ -23,6 +23,30 @@ func NewAttendanceHandler(attService attendanceService.AttServiceInterface, user
 	}
 }
 
+func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
+	attendances, err := ah.attService.GetAttendances()
+	switch {
+	case err != nil:
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	default:
+		var data []attendanceResponse.AttGetResponse
+		for _, val := range attendances {
+			attFormatter := attendanceResponse.FormatGetAtt(val)
+			data = append(data, attFormatter)
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Success Get Attendances Data", http.StatusOK, true, data))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+}
+
 func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
