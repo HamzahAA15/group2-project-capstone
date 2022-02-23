@@ -76,3 +76,29 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 
 	return checkinsouts, nil
 }
+
+func (cr *checkInOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntities.Checkin, error) {
+	query := `INSERT INTO checkins (id, attendance_id, temprature, is_checkins, is_checkouts, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	// query, _ := cr.db.Query(`INSERT INTO checkins (id, attendance_id, temprature, is_checkins, is_checkouts, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+	// SELECT
+	// 	attendances.id, attendances.status
+	// FROM
+	// 	attendances
+	// JOIN
+	// 	checkins ON checkins.attendance_id = attendances.id
+	// WHERE
+	// 	attendances.status = 'approved' AND attendances.id = ?`)
+
+	statement, err := cr.db.Prepare(query)
+	if err != nil {
+		return checkin, err
+	}
+
+	_, errExec := statement.Exec(checkin.ID, checkin.AttendanceID, checkin.Temprature, checkin.IsCheckIns, checkin.IsCheckOuts, checkin.CreatedAt, checkin.UpdatedAt)
+	if errExec != nil {
+		return checkin, errExec
+	}
+
+	return checkin, nil
+}
