@@ -24,7 +24,11 @@ func NewAttendanceHandler(attService attendanceService.AttServiceInterface, user
 }
 
 func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
-	attendances, err := ah.attService.GetAttendances()
+	queryParams := r.URL.Query()
+	employee := queryParams["employee"]
+	time := queryParams["time"]
+
+	attendances, err := ah.attService.GetAttendances(employee[0], time[0])
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
