@@ -27,8 +27,17 @@ func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	employee := queryParams["employee"]
 	time := queryParams["time"]
+	status := queryParams["status"]
 
-	attendances, err := ah.attService.GetAttendances(employee[0], time[0])
+	attendances, err := ah.attService.GetAttendances(employee[0], time[0], status[0])
+	if len(attendances) == 0 {
+		response, _ := json.Marshal(utils.APIResponse("request not found", http.StatusNotFound, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(response)
+		return
+	}
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
