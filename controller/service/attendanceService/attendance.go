@@ -21,8 +21,8 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 	}
 }
 
-func (as *attendanceService) GetAttendances(employee, time string) ([]attendanceEntities.Attendance, error) {
-	attendances, err := as.attRepo.GetAttendances(employee, time)
+func (as *attendanceService) GetAttendances(employee, time, status string) ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.GetAttendances(employee, time, status)
 	if err != nil {
 		return attendances, err
 	}

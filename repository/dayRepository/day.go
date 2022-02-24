@@ -32,6 +32,7 @@ func (dr *dayRepo) GetDays(office, time string) ([]dayEntities.Day, error) {
 		}
 		days = append(days, day)
 	}
+
 	return days, nil
 }
 

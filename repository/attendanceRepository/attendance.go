@@ -15,10 +15,11 @@ func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 	}
 }
 
-func (ar *attendanceRepo) GetAttendances(employee, time string) ([]attendanceEntities.Attendance, error) {
+func (ar *attendanceRepo) GetAttendances(employee, time, status string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
 	convEmployee := "%" + employee + "%"
 	convTime := "%" + time + "%"
+	convStatus := "%" + status + "%"
 
 	result, err := ar.db.Query(`
 	SELECT
@@ -34,7 +35,7 @@ func (ar *attendanceRepo) GetAttendances(employee, time string) ([]attendanceEnt
 	LEFT JOIN
 		users AS admin ON admin.id = attendances.admin_id
 	WHERE
-		user.name LIKE ? AND day.date LIKE ?`, convEmployee, convTime)
+		user.name LIKE ? AND day.date LIKE ? AND attendances.status LIKE ?`, convEmployee, convTime, convStatus)
 	if err != nil {
 		return attendances, err
 	}
@@ -48,6 +49,7 @@ func (ar *attendanceRepo) GetAttendances(employee, time string) ([]attendanceEnt
 			return attendances, errScan
 		}
 		attendances = append(attendances, attendance)
+
 	}
 	return attendances, nil
 }
