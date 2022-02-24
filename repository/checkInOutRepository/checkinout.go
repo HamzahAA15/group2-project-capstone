@@ -3,6 +3,7 @@ package checkInOutRepository
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"sirclo/project-capstone/entities/checkinEntities"
 )
 
@@ -76,6 +77,67 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 	}
 
 	return checkinsouts, nil
+}
+
+func (cr *checkInOutRepo) CheckRequest(userID string, attendanceID string) int {
+	row, err := cr.db.Query(`
+	SELECT
+		COUNT(attendances.id)
+	FROM
+		attendances
+	WHERE
+			attendances.user_id = ?
+		AND
+			attendances.id = ?
+		AND 
+			attendances.status <> "approved"
+	GROUP BY
+		attendances.id`, userID, attendanceID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+
+	var count int
+
+	for row.Next() {
+		if err := row.Scan(&count); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return count
+}
+func (cr *checkInOutRepo) CheckData(userID string, attendanceID string) int {
+	row, err := cr.db.Query(`
+	SELECT
+		COUNT(attendances.id)
+	FROM
+		attendances
+	JOIN
+		checkins ON checkins.attendance_id = attendances.id
+	WHERE
+			attendances.user_id = ?
+		AND
+			checkins.attendance_id = ?
+		AND 
+			attendances.status = "approved"`, userID, attendanceID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+
+	var count int
+
+	for row.Next() {
+		if err := row.Scan(&count); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return count
 }
 
 func (cr *checkInOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntities.Checkin, error) {
