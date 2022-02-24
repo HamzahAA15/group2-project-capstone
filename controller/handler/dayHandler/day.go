@@ -24,7 +24,10 @@ func NewDayHandler(dayService dayService.DayServiceInterface, userService userSe
 }
 
 func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
-	days, err := dh.dayService.GetDays()
+	queryParams := r.URL.Query()
+	office := queryParams["office"]
+	time := queryParams["time"]
+	days, err := dh.dayService.GetDays(office[0], time[0])
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
