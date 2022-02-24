@@ -82,9 +82,32 @@ func (ch *checkInOutHandler) GetsByUserHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.ForContext(ctx).ID
+
 	var input checkInsOutsRequest.CheckInsRequest
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&input)
+
+	userRequest := ch.checkInOutService.CheckRequest(userID, input.AttendanceID)
+	if userRequest > 0 {
+		response, _ := json.Marshal(utils.APIResponse("you don't have permission to check-ins in this presence", http.StatusForbidden, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write(response)
+		return
+	}
+
+	user := ch.checkInOutService.CheckData(userID, input.AttendanceID)
+	if user > 0 {
+		response, _ := json.Marshal(utils.APIResponse("you have been check-ins in this presence", http.StatusBadRequest, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response)
+		return
+	}
 
 	checkIns, err := ch.checkInOutService.Checkin(input)
 	switch {
