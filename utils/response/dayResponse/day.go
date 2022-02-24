@@ -6,9 +6,10 @@ import (
 )
 
 type DayResponse struct {
-	ID    string    `json:"id"`
-	Date  time.Time `json:"date"`
-	Quota int       `json:"Quota"`
+	ID     string    `json:"id"`
+	Office string    `json:"office"`
+	Date   time.Time `json:"date"`
+	Quota  int       `json:"Quota"`
 }
 
 type DayUpdateResponse struct {
@@ -18,9 +19,10 @@ type DayUpdateResponse struct {
 
 func FormatDay(day dayEntities.Day) DayResponse {
 	fomatter := DayResponse{
-		ID:    day.ID,
-		Date:  day.Date,
-		Quota: day.Quota,
+		ID:     day.ID,
+		Office: day.OfficeId.Name,
+		Date:   day.Date,
+		Quota:  day.Quota,
 	}
 	return fomatter
 }
