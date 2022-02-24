@@ -19,8 +19,8 @@ func NewDayService(dayRepo dayRepository.DayRepoInterface, userRepo userReposito
 	}
 }
 
-func (ds *dayService) GetDays() ([]dayEntities.Day, error) {
-	days, err := ds.dayRepository.GetDays()
+func (ds *dayService) GetDays(office, time string) ([]dayEntities.Day, error) {
+	days, err := ds.dayRepository.GetDays(office, time)
 	if err != nil {
 		return days, err
 	}
