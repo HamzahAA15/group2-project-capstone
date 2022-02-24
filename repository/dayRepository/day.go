@@ -15,19 +15,18 @@ func NewMySQLDayRepository(db *sql.DB) DayRepoInterface {
 	}
 }
 
-func (dr *dayRepo) GetDays() ([]dayEntities.Day, error) {
+func (dr *dayRepo) GetDays(office, time string) ([]dayEntities.Day, error) {
 	var days []dayEntities.Day
-
-	result, err := dr.db.Query(`SELECT days.id, office.name, days.date, days.quota FROM days LEFT JOIN offices AS office ON office.id = days.office_id`)
+	convOffice := "%" + office + "%"
+	convTime := "%" + time + "%"
+	result, err := dr.db.Query(`SELECT days.id, office.name, days.date, days.quota FROM days LEFT JOIN offices AS office ON office.id = days.office_id WHERE office.name LIKE ? AND days.date LIKE ?`, convOffice, convTime)
 	if err != nil {
 		return days, err
 	}
-
 	for result.Next() {
 		var day dayEntities.Day
 
 		errScan := result.Scan(&day.ID, &day.OfficeId.Name, &day.Date, &day.Quota)
-
 		if errScan != nil {
 			return days, errScan
 		}
