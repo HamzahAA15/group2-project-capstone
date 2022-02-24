@@ -29,6 +29,16 @@ func (cs *checkinoutService) GetByUser(userID string) ([]checkinEntities.Checkin
 	return checkinsout, err
 }
 
+func (cs *checkinoutService) CheckRequest(userID string, attendanceID string) int {
+	countData := cs.checkinoutRepository.CheckRequest(userID, attendanceID)
+	return countData
+}
+
+func (cs *checkinoutService) CheckData(userID string, attendanceID string) int {
+	countData := cs.checkinoutRepository.CheckData(userID, attendanceID)
+	return countData
+}
+
 func (cs *checkinoutService) Checkin(input checkInsOutsRequest.CheckInsRequest) (checkinEntities.Checkin, error) {
 	checkins := checkinEntities.Checkin{}
 	checkins.ID = uuid.New().String()
