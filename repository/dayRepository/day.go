@@ -18,7 +18,7 @@ func NewMySQLDayRepository(db *sql.DB) DayRepoInterface {
 func (dr *dayRepo) GetDays() ([]dayEntities.Day, error) {
 	var days []dayEntities.Day
 
-	result, err := dr.db.Query(`SELECT id, office_id, date, quota FROM days`)
+	result, err := dr.db.Query(`SELECT days.id, office.name, days.date, days.quota FROM days LEFT JOIN offices AS office ON office.id = days.office_id`)
 	if err != nil {
 		return days, err
 	}
@@ -26,7 +26,7 @@ func (dr *dayRepo) GetDays() ([]dayEntities.Day, error) {
 	for result.Next() {
 		var day dayEntities.Day
 
-		errScan := result.Scan(&day.ID, &day.OfficeId, &day.Date, &day.Quota)
+		errScan := result.Scan(&day.ID, &day.OfficeId.Name, &day.Date, &day.Quota)
 
 		if errScan != nil {
 			return days, errScan
