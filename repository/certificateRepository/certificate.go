@@ -179,3 +179,21 @@ func (cr *certificateRepo) UploadCertificateVaccine(certificate certificateEntit
 	return certificate, nil
 
 }
+
+func (cr *certificateRepo) VerifyCertificate(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error) {
+	query := `UPDATE certificates SET status = ?, admin_id = ?, updated_at = ? WHERE id = ?`
+
+	statement, err := cr.db.Prepare(query)
+	if err != nil {
+		return certificate, err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(certificate.Status, certificate.Admin.ID, certificate.UpdatedAt, certificate.ID)
+	if err != nil {
+		return certificate, err
+	}
+
+	return certificate, nil
+}
