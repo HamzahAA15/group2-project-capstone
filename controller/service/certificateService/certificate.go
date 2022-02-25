@@ -1,6 +1,7 @@
 package certificateService
 
 import (
+	"fmt"
 	"sirclo/project-capstone/entities/certificateEntities"
 	"sirclo/project-capstone/repository/certificateRepository"
 	"sirclo/project-capstone/utils/request/certificateRequest"
@@ -56,4 +57,19 @@ func (cs *certificateService) UploadCertificateVaccine(userID string, input cert
 
 	_, err := cs.certificateRepository.UploadCertificateVaccine(upload)
 	return err
+}
+
+func (cs *certificateService) VerifyCertificate(id string, userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error) {
+	certificate, _ := cs.GetCertificate(id)
+
+	certificate.ID = id
+	certificate.Status = input.Status
+	certificate.Admin.ID = userID
+	certificate.UpdatedAt = time.Now()
+
+	fmt.Println("ini certificate", certificate)
+
+	updateCertificate, err := cs.certificateRepository.VerifyCertificate(certificate)
+	fmt.Println("ini err", err)
+	return updateCertificate, err
 }

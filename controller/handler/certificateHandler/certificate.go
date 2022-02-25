@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/gorilla/mux"
 )
 
 type certificateHandler struct {
@@ -179,4 +180,42 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(response)
+}
+
+func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+
+	ctx := r.Context()
+	userID := middleware.ForContext(ctx).ID
+
+	user, _ := ch.userService.GetUser(userID)
+	if user.Role != "admin" {
+		response, _ := json.Marshal(utils.APIResponse("You don't have permission to access this url", http.StatusUnauthorized, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(response)
+		return
+	}
+
+	var input certificateRequest.CertificateUploadRequest
+
+	decoder := json.NewDecoder(r.Body)
+	_ = decoder.Decode(&input)
+
+	_, err := ch.certificateService.VerifyCertificate(id, userID, input)
+	switch {
+	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		response, _ := json.Marshal(utils.APIResponse("Success Update Data", http.StatusOK, true, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
 }
