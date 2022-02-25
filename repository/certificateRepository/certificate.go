@@ -50,6 +50,19 @@ func (cr *certificateRepo) GetCertificates(officeID string) ([]certificateEntiti
 	return certificates, nil
 }
 
+func (cr *certificateRepo) GetCertificate(id string) (certificateEntities.Certificate, error) {
+	var certificate certificateEntities.Certificate
+
+	row := cr.db.QueryRow(`SELECT id, user_id, image, dosage, status, created_at, updated_at FROM certificates WHERE id = ?`, id)
+
+	err := row.Scan(&certificate.ID, &certificate.User.ID, &certificate.Image, &certificate.Dosage, &certificate.Status, &certificate.CreatedAt, &certificate.UpdatedAt)
+	if err != nil {
+		return certificate, err
+	}
+
+	return certificate, nil
+}
+
 func (cr *certificateRepo) GetCertificateUser(userID string) ([]certificateEntities.Certificate, error) {
 	var certificates []certificateEntities.Certificate
 
