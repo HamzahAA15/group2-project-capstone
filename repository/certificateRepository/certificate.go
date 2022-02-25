@@ -2,6 +2,7 @@ package certificateRepository
 
 import (
 	"database/sql"
+	"log"
 	"sirclo/project-capstone/entities/certificateEntities"
 )
 
@@ -83,4 +84,85 @@ func (cr *certificateRepo) GetCertificateUser(userID string) ([]certificateEntit
 	}
 
 	return certificates, nil
+}
+
+func (cr *certificateRepo) CountVaccineIsAccept(userID string, dossage int) int {
+	row, err := cr.db.Query(`
+	SELECT
+		COUNT(certificates.user_id)
+	FROM
+		certificates
+	WHERE
+			certificates.user_id = ?
+		AND
+			certificates.status = "pending"
+		AND 
+			certificates.dosage = ?
+	ORDER BY
+		certificates.created_at DESC`, userID, dossage)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+
+	var count int
+
+	for row.Next() {
+		if err := row.Scan(&count); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return count
+}
+
+func (cr *certificateRepo) GetVaccineDose(userID string) int {
+	row, err := cr.db.Query(`
+	SELECT
+		COUNT(certificates.user_id)
+	FROM
+		certificates
+	WHERE
+			certificates.user_id = ?
+		AND
+			certificates.status = "approved"
+	GROUP BY
+		certificates.user_id`, userID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+
+	var count int
+
+	for row.Next() {
+		if err := row.Scan(&count); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return count
+}
+
+func (cr *certificateRepo) UploadCertificateVaccine(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error) {
+	query := `INSERT INTO certificates (id, user_id, image, dosage, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	statement, err := cr.db.Prepare(query)
+	if err != nil {
+		return certificate, err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(certificate.ID, certificate.User.ID, certificate.Image, certificate.Dosage, certificate.Status, certificate.CreatedAt, certificate.UpdatedAt)
+	if err != nil {
+		return certificate, err
+	}
+
+	return certificate, nil
+
 }
