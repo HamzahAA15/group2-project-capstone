@@ -84,3 +84,22 @@ func (cr *certificateRepo) GetCertificateUser(userID string) ([]certificateEntit
 
 	return certificates, nil
 }
+
+func (cr *certificateRepo) UploadCertificateVaccine(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error) {
+	query := `INSERT INTO certificates (id, user_id, image, dosage, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	statement, err := cr.db.Prepare(query)
+	if err != nil {
+		return certificate, err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(certificate.ID, certificate.User.ID, certificate.Image, certificate.Dosage, certificate.Status, certificate.CreatedAt, certificate.UpdatedAt)
+	if err != nil {
+		return certificate, err
+	}
+
+	return certificate, nil
+
+}
