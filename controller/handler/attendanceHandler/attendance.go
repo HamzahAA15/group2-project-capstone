@@ -28,8 +28,12 @@ func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
 	employee := queryParams["employee"]
 	time := queryParams["time"]
 	status := queryParams["status"]
-
-	attendances, err := ah.attService.GetAttendances(employee[0], time[0], status[0])
+	office := queryParams["office"]
+	order := queryParams["order"]
+	if order[0] == "" {
+		order[0] = "asc"
+	}
+	attendances, err := ah.attService.GetAttendances(employee[0], time[0], status[0], office[0], order[0])
 	if len(attendances) == 0 {
 		response, _ := json.Marshal(utils.APIResponse("request not found", http.StatusNotFound, false, nil))
 
