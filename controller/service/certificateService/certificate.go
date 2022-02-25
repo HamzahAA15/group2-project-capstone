@@ -29,6 +29,16 @@ func (cs *certificateService) GetCertificateUser(userID string) ([]certificateEn
 	return certificates, err
 }
 
+func (cs *certificateService) CountVaccineAccept(userID string, dossage int) int {
+	countData := cs.certificateRepository.CountVaccineIsAccept(userID, dossage)
+	return countData
+}
+
+func (cs *certificateService) GetVaccineDose(userID string) int {
+	countData := cs.certificateRepository.GetVaccineDose(userID)
+	return countData
+}
+
 func (cs *certificateService) UploadCertificateVaccine(userID string, input certificateRequest.CertificateUploadRequest) error {
 	upload := certificateEntities.Certificate{}
 	upload.ID = uuid.New().String()
