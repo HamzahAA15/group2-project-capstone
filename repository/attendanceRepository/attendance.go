@@ -3,7 +3,6 @@ package attendanceRepository
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"sirclo/project-capstone/entities/attendanceEntities"
 	"strings"
@@ -19,10 +18,10 @@ func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 	}
 }
 
-func (ar *attendanceRepo) GetAttendances(employee, time, status, office, order string) ([]attendanceEntities.Attendance, error) {
+func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
 	convEmployee := "%" + employee + "%"
-	convTime := "%" + time + "%"
+	convTime := "%" + date + "%"
 	convStatus := "%" + status + "%"
 	convOffice := "%" + office + "%"
 
@@ -30,7 +29,7 @@ func (ar *attendanceRepo) GetAttendances(employee, time, status, office, order s
 	if strings.ToLower(order) == "desc" {
 		query = `
 		SELECT
-			attendances.id, day.date AS date, office.name, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
+			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
 			attendances
 		LEFT JOIN
@@ -48,7 +47,7 @@ func (ar *attendanceRepo) GetAttendances(employee, time, status, office, order s
 	if strings.ToLower(order) == "asc" {
 		query = `
 		SELECT
-			attendances.id, day.date AS date, office.name, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
+			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
 			attendances
 		LEFT JOIN
@@ -71,7 +70,7 @@ func (ar *attendanceRepo) GetAttendances(employee, time, status, office, order s
 	for result.Next() {
 		var attendance attendanceEntities.Attendance
 
-		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.Office, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
+		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
 
 		if errScan != nil {
 			return attendances, errScan
@@ -92,13 +91,11 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 	case errNoRows != nil:
 		log.Fatal(errNoRows)
 	}
-	fmt.Println(checkDate)
 
 	errDouble := ar.db.QueryRow(`SELECT count(id) as id FROM attendances WHERE day_id = ? AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
 	if errDouble != nil {
 		log.Fatal(errDouble)
 	}
-	fmt.Println(checkDouble)
 	if checkDouble != 0 {
 		return att, errors.New("you already sign for current date")
 	}
@@ -109,13 +106,11 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 	if err != nil {
 		return att, err
 	}
-	fmt.Println("err ", err)
 
 	_, errExec := statement.Exec(att.ID, att.Day.ID, att.Employee.ID)
 	if errExec != nil {
 		return att, errExec
 	}
-	fmt.Println("errExec ", errExec)
 	return att, nil
 }
 
