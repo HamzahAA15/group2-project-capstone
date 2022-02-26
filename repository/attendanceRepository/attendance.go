@@ -2,6 +2,9 @@ package attendanceRepository
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
+	"log"
 	"sirclo/project-capstone/entities/attendanceEntities"
 	"strings"
 )
@@ -80,17 +83,39 @@ func (ar *attendanceRepo) GetAttendances(employee, time, status, office, order s
 }
 
 func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (attendanceEntities.Attendance, error) {
+	var checkDate string
+	var checkDouble int
+	errNoRows := ar.db.QueryRow(`SELECT days.date FROM days WHERE days.id = ? AND days.date > now()`, att.Day.ID).Scan(&checkDate)
+	switch {
+	case errNoRows == sql.ErrNoRows:
+		return att, errors.New("day has passed")
+	case errNoRows != nil:
+		log.Fatal(errNoRows)
+	}
+	fmt.Println(checkDate)
+
+	errDouble := ar.db.QueryRow(`SELECT count(id) as id FROM attendances WHERE day_id = ? AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
+	if errDouble != nil {
+		log.Fatal(errDouble)
+	}
+	fmt.Println(checkDouble)
+	if checkDouble != 0 {
+		return att, errors.New("you already sign for current date")
+	}
+
 	query := `INSERT INTO attendances (id, day_id, user_id, created_at) VALUES (?, ?, ?, now())`
 
 	statement, err := ar.db.Prepare(query)
 	if err != nil {
 		return att, err
 	}
+	fmt.Println("err ", err)
 
 	_, errExec := statement.Exec(att.ID, att.Day.ID, att.Employee.ID)
 	if errExec != nil {
 		return att, errExec
 	}
+	fmt.Println("errExec ", errExec)
 	return att, nil
 }
 

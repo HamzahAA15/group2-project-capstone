@@ -1,6 +1,7 @@
 package attendanceService
 
 import (
+	"fmt"
 	"sirclo/project-capstone/entities/attendanceEntities"
 	"sirclo/project-capstone/repository/attendanceRepository"
 	"sirclo/project-capstone/repository/userRepository"
@@ -39,6 +40,7 @@ func (as *attendanceService) CreateAttendance(loginId string, input attendanceRe
 	if err != nil {
 		return attendance, err
 	}
+	fmt.Println("err svc: ", err)
 	return createAttendance, nil
 }
 
