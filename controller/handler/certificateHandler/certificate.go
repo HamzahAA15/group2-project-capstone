@@ -45,7 +45,7 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	certificates, err := ch.certificateService.GetCertificates(user.OfficeID)
+	certificates, err := ch.certificateService.GetCertificates(user.Office.ID)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
