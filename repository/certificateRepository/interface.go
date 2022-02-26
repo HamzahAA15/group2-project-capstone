@@ -9,4 +9,5 @@ type CertificateInterface interface {
 	CountVaccineIsAccept(userID string, dossage int) int
 	GetVaccineDose(userID string) int
 	UploadCertificateVaccine(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error)
+	VerifyCertificate(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error)
 }
