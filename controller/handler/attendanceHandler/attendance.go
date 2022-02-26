@@ -2,6 +2,7 @@ package attendanceHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/attendanceService"
 	"sirclo/project-capstone/controller/service/userService"
@@ -73,6 +74,7 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 	_ = decoder.Decode(&input)
 
 	attCreate, err := ah.attService.CreateAttendance(user.ID, input)
+	fmt.Println("err hnd: ", err)
 	switch {
 	case err != nil: // error internal server
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
