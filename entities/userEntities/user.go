@@ -1,10 +1,13 @@
 package userEntities
 
-import "time"
+import (
+	"sirclo/project-capstone/entities/officeEntities"
+	"time"
+)
 
 type User struct {
 	ID        string
-	OfficeID  string
+	Office    officeEntities.Office
 	Avatar    string
 	Name      string
 	Nik       string

@@ -26,23 +26,16 @@ func NewAttendanceHandler(attService attendanceService.AttServiceInterface, user
 
 func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
-	employee := queryParams["employee"]
-	time := queryParams["time"]
-	status := queryParams["status"]
-	office := queryParams["office"]
-	order := queryParams["order"]
-	if order[0] == "" {
-		order[0] = "asc"
+	employee := queryParams.Get("employee")
+	date := queryParams.Get("date")
+	status := queryParams.Get("status")
+	office := queryParams.Get("office")
+	order := queryParams.Get("order")
+	if order == "" {
+		order = "asc"
 	}
-	attendances, err := ah.attService.GetAttendances(employee[0], time[0], status[0], office[0], order[0])
-	if len(attendances) == 0 {
-		response, _ := json.Marshal(utils.APIResponse("request not found", http.StatusNotFound, false, nil))
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write(response)
-		return
-	}
+	attendances, err := ah.attService.GetAttendances(employee, date, status, office, order)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))

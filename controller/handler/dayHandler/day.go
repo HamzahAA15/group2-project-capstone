@@ -25,17 +25,9 @@ func NewDayHandler(dayService dayService.DayServiceInterface, userService userSe
 
 func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
-	office := queryParams["office"]
-	time := queryParams["time"]
-	days, err := dh.dayService.GetDays(office[0], time[0])
-	if len(days) == 0 {
-		response, _ := json.Marshal(utils.APIResponse("request day not found", http.StatusNotFound, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write(response)
-		return
-	}
+	office := queryParams.Get("office_id")
+	time := queryParams.Get("date")
+	days, err := dh.dayService.GetDays(office, time)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))

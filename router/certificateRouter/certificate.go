@@ -26,5 +26,7 @@ func (cr CertificateResource) CertificateRoute(
 	router := mux.NewRouter()
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(certificateHandler.GetCertificatesHandler))).Methods("GET")
 	router.Handle("/user", middleware.Authentication(http.HandlerFunc(certificateHandler.GetCertificateUserHandler))).Methods("GET")
+	router.Handle("/", middleware.Authentication(http.HandlerFunc(certificateHandler.UploadCertificateHandler))).Methods("POST")
+	router.Handle("/{id}", middleware.Authentication(http.HandlerFunc(certificateHandler.VerifyCertificateHandler))).Methods("PUT")
 	return router
 }
