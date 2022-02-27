@@ -6,10 +6,12 @@ import (
 )
 
 type Day struct {
-	ID        string
-	OfficeId  officeEntities.Office
-	Date      time.Time
-	Quota     int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID             string
+	OfficeId       officeEntities.Office
+	Date           time.Time
+	Quota          int
+	TotalApproved  int
+	RemainingQuota int
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
