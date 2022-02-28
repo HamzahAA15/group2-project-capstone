@@ -25,3 +25,26 @@ func FormatCertificate(certificate certificateEntities.Certificate) CertificateR
 
 	return fomatter
 }
+
+type CertificatesResponse struct {
+	UserID       string                `json:"user_id"`
+	UserName     string                `json:"user_name"`
+	Certificates []CertificateResponse `json:"certificates"`
+}
+
+func FormatCertificates(certificate certificateEntities.Certificates) CertificatesResponse {
+	data := []CertificateResponse{}
+
+	for i := range certificate.Certificates {
+		certificateFormatter := FormatCertificate(certificate.Certificates[i])
+		data = append(data, certificateFormatter)
+	}
+
+	formatter := CertificatesResponse{
+		UserID:       certificate.User.ID,
+		UserName:     certificate.User.Name,
+		Certificates: data,
+	}
+
+	return formatter
+}
