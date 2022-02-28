@@ -20,8 +20,8 @@ func NewCertificateService(repo certificateRepository.CertificateInterface) Cert
 	}
 }
 
-func (cs *certificateService) GetCertificates(officeID string) ([]certificateEntities.Certificate, error) {
-	certificates, err := cs.certificateRepository.GetCertificates(officeID)
+func (cs *certificateService) GetCertificates(orderBy string) ([]certificateEntities.Certificates, error) {
+	certificates, err := cs.certificateRepository.GetCertificates(orderBy)
 	return certificates, err
 }
 
