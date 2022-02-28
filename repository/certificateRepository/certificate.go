@@ -77,7 +77,7 @@ func (cr *certificateRepo) GetCertificateUser(userID string) ([]certificateEntit
 	LEFT JOIN
 		users AS admin ON admin.id = certificates.admin_id
 	WHERE
-		user.id = ?
+		user.id = ? AND certificates.status <> "rejected"
 	ORDER BY 
 		certificates.updated_at DESC`, userID)
 	if err != nil {
