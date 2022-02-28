@@ -2,6 +2,7 @@ package certificateRepository
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"sirclo/project-capstone/entities/certificateEntities"
 )
@@ -16,38 +17,65 @@ func NewMySQLCertificateRepository(db *sql.DB) CertificateInterface {
 	}
 }
 
-func (cr *certificateRepo) GetCertificates(officeID string) ([]certificateEntities.Certificate, error) {
-	var certificates []certificateEntities.Certificate
+func (cr *certificateRepo) GetCertificates(orderBy string) ([]certificateEntities.Certificates, error) {
+	var result []certificateEntities.Certificates
 
-	result, err := cr.db.Query(`
+	resultUser, errUser := cr.db.Query(fmt.Sprintf(`
 	SELECT 
-		certificates.id, certificates.image, certificates.dosage, certificates.status, 
-		user.name AS employee, (COALESCE(NULLIF(admin.name,''), '-')) AS admin
+		users.id, users.name
 	FROM 
-		certificates
-	LEFT JOIN 
-		users AS user ON user.id = certificates.user_id
+		users
 	LEFT JOIN
-		users AS admin ON admin.id = certificates.admin_id
-	ORDER BY 
-		certificates.updated_at DESC`)
-	if err != nil {
-		return certificates, err
+		certificates ON certificates.user_id = users.id
+	GROUP BY
+		users.id
+	ORDER BY
+		users.name %s`, orderBy))
+	if errUser != nil {
+		return result, errUser
 	}
 
-	for result.Next() {
-		var certificate certificateEntities.Certificate
+	for resultUser.Next() {
+		var user certificateEntities.Certificates
 
-		errScan := result.Scan(&certificate.ID, &certificate.Image, &certificate.Dosage, &certificate.Status, &certificate.User.Name, &certificate.Admin.Name)
-
-		if errScan != nil {
-			return certificates, errScan
+		errScanUser := resultUser.Scan(&user.User.ID, &user.User.Name)
+		if errScanUser != nil {
+			return result, errScanUser
 		}
 
-		certificates = append(certificates, certificate)
+		resultCertificate, errCertificate := cr.db.Query(`
+		SELECT 
+			certificates.id, certificates.image, certificates.dosage, certificates.status, 
+			user.name AS employee, (COALESCE(NULLIF(admin.name,''), '-')) AS admin
+		FROM 
+			certificates
+		LEFT JOIN 
+			users AS user ON user.id = certificates.user_id
+		LEFT JOIN
+			users AS admin ON admin.id = certificates.admin_id
+		WHERE
+			certificates.user_id = ?
+		ORDER BY 
+			certificates.dosage ASC`, user.User.ID)
+		if errCertificate != nil {
+			return result, errCertificate
+		}
+
+		for resultCertificate.Next() {
+			var certificate certificateEntities.Certificate
+
+			errScanCertificate := resultCertificate.Scan(&certificate.ID, &certificate.Image, &certificate.Dosage, &certificate.Status, &certificate.User.Name, &certificate.Admin.Name)
+			if errScanCertificate != nil {
+				return result, errScanCertificate
+			}
+
+			user.Certificates = append(user.Certificates, certificate)
+		}
+
+		result = append(result, user)
 	}
 
-	return certificates, nil
+	return result, nil
 }
 
 func (cr *certificateRepo) GetCertificate(id string) (certificateEntities.Certificate, error) {
