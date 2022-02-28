@@ -15,3 +15,8 @@ type Certificate struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Certificates struct {
+	User         userEntities.User
+	Certificates []Certificate
+}

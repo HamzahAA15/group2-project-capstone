@@ -35,6 +35,9 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 	ctx := r.Context()
 	userID := middleware.ForContext(ctx).ID
 
+	queryParams := r.URL.Query()
+	orderBy := queryParams.Get("order_by")
+
 	user, _ := ch.userService.GetUser(userID)
 	if user.Role != "admin" {
 		response, _ := json.Marshal(utils.APIResponse("You don't have permission to access this data", http.StatusUnauthorized, false, nil))
@@ -45,7 +48,7 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	certificates, err := ch.certificateService.GetCertificates(user.Office.ID)
+	certificates, err := ch.certificateService.GetCertificates(orderBy)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -54,10 +57,10 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default:
-		var data []certificateResponse.CertificateResponse
+		var data []certificateResponse.CertificatesResponse
 		for _, val := range certificates {
-			dayFormatter := certificateResponse.FormatCertificate(val)
-			data = append(data, dayFormatter)
+			certificateFormatter := certificateResponse.FormatCertificates(val)
+			data = append(data, certificateFormatter)
 		}
 
 		response, _ := json.Marshal(utils.APIResponse("Success Get Certificates Data", http.StatusOK, true, data))
@@ -84,8 +87,8 @@ func (ch *certificateHandler) GetCertificateUserHandler(w http.ResponseWriter, r
 	default:
 		var data []certificateResponse.CertificateResponse
 		for _, val := range certificates {
-			dayFormatter := certificateResponse.FormatCertificate(val)
-			data = append(data, dayFormatter)
+			certificateFormatter := certificateResponse.FormatCertificate(val)
+			data = append(data, certificateFormatter)
 		}
 
 		response, _ := json.Marshal(utils.APIResponse("Success Get Certificates Data", http.StatusOK, true, data))
