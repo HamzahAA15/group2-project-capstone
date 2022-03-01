@@ -3,9 +3,9 @@ package attendanceRepository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"sirclo/project-capstone/entities/attendanceEntities"
-	"strings"
 )
 
 type attendanceRepo struct {
@@ -26,8 +26,7 @@ func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order s
 	convOffice := "%" + office + "%"
 
 	var query string
-	if strings.ToLower(order) == "desc" {
-		query = `
+	query = `
 		SELECT
 			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
@@ -42,27 +41,8 @@ func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order s
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
 			user.name LIKE ? AND day.date LIKE ? AND attendances.status LIKE ? AND office.name LIKE ?
-		ORDER BY attendances.created_at desc`
-	}
-	if strings.ToLower(order) == "asc" {
-		query = `
-		SELECT
-			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
-		FROM 
-			attendances
-		LEFT JOIN
-			days AS day ON day.id = attendances.day_id
-		LEFT JOIN
-			offices AS office ON office.id = day.office_id
-		LEFT JOIN
-			users AS user ON user.id = attendances.user_id
-		LEFT JOIN
-			users AS admin ON admin.id = attendances.admin_id
-		WHERE
-			user.name LIKE ? AND day.date LIKE ? AND attendances.status LIKE ? AND office.name LIKE ?
-		ORDER BY attendances.created_at asc`
-	}
-	result, err := ar.db.Query(query, convEmployee, convTime, convStatus, convOffice)
+		ORDER BY attendances.created_at %s`
+	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, convTime, convStatus, convOffice)
 	if err != nil {
 		return attendances, err
 	}
@@ -88,8 +68,7 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 	convOffice := "%" + office + "%"
 
 	var query string
-	if strings.ToLower(order) == "desc" {
-		query = `
+	query = `
 		SELECT
 			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
@@ -104,10 +83,30 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
 			user.name LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.name LIKE ?
-		ORDER BY attendances.created_at desc`
+		ORDER BY attendances.created_at %s`
+	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, dateStart, dateEnd, convStatus, convOffice)
+	if err != nil {
+		return attendances, err
 	}
-	if strings.ToLower(order) == "asc" {
-		query = `
+
+	for result.Next() {
+		var attendance attendanceEntities.Attendance
+
+		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
+
+		if errScan != nil {
+			return attendances, errScan
+		}
+		attendances = append(attendances, attendance)
+
+	}
+	return attendances, nil
+}
+
+func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, order string) ([]attendanceEntities.Attendance, error) {
+	var attendances []attendanceEntities.Attendance
+	var query string
+	query = `
 		SELECT
 			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
@@ -121,10 +120,9 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 		LEFT JOIN
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
-			user.name LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.name LIKE ?
-		ORDER BY attendances.created_at asc`
-	}
-	result, err := ar.db.Query(query, convEmployee, dateStart, dateEnd, convStatus, convOffice)
+			user.id = ?
+		ORDER BY attendances.created_at %s`
+	result, err := ar.db.Query(fmt.Sprintf(query, order), userId)
 	if err != nil {
 		return attendances, err
 	}

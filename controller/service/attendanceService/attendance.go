@@ -38,6 +38,14 @@ func (as *attendanceService) GetAttendancesRangeDate(employee, dateStart, dateEn
 	return attendances, nil
 }
 
+func (as *attendanceService) GetAttendancesCurrentUser(userId, order string) ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.GetAttendancesCurrentUser(userId, order)
+	if err != nil {
+		return attendances, err
+	}
+	return attendances, nil
+}
+
 func (as *attendanceService) CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error) {
 	var attendance attendanceEntities.Attendance
 	attendance.ID = uuid.New().String()
