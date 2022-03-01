@@ -34,7 +34,7 @@ func (cr *checkInOutRepo) Gets() ([]checkinEntities.Checkin, error) {
 	for result.Next() {
 		var checkinout checkinEntities.Checkin
 
-		errScan := result.Scan(&checkinout.ID, &checkinout.AttendanceID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
+		errScan := result.Scan(&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
 
 		if errScan != nil {
 			return checkinsouts, errScan
@@ -67,7 +67,7 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 	for result.Next() {
 		var checkinout checkinEntities.Checkin
 
-		errScan := result.Scan(&checkinout.ID, &checkinout.AttendanceID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
+		errScan := result.Scan(&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
 
 		if errScan != nil {
 			return checkinsouts, errScan
@@ -79,36 +79,29 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 	return checkinsouts, nil
 }
 
-func (cr *checkInOutRepo) CheckRequest(userID string, attendanceID string) int {
-	row, err := cr.db.Query(`
+func (cr *checkInOutRepo) CheckRequest(attendanceID string) (checkinEntities.Checkin, error) {
+	var checkRequest checkinEntities.Checkin
+
+	row := cr.db.QueryRow(`
 	SELECT
-		COUNT(attendances.id)
+		attendances.id, attendances.user_id, attendances.status
 	FROM
-		attendances
+		checkins
+	RIGHT JOIN
+		attendances ON attendances.id = checkins.attendance_id
 	WHERE
-			attendances.user_id = ?
-		AND
 			attendances.id = ?
-		AND 
-			attendances.status <> "approved"
 	GROUP BY
-		attendances.id`, userID, attendanceID)
+		attendances.id`, attendanceID)
+
+	err := row.Scan(&checkRequest.Attendance.ID, &checkRequest.Attendance.Employee.ID, &checkRequest.Attendance.Status)
 	if err != nil {
-		log.Fatal(err)
+		return checkRequest, err
 	}
 
-	defer row.Close()
-
-	var count int
-
-	for row.Next() {
-		if err := row.Scan(&count); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return count
+	return checkRequest, nil
 }
+
 func (cr *checkInOutRepo) CheckData(userID string, attendanceID string) int {
 	row, err := cr.db.Query(`
 	SELECT
@@ -148,7 +141,7 @@ func (cr *checkInOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntit
 		return checkin, err
 	}
 
-	_, errExec := statement.Exec(checkin.ID, checkin.AttendanceID, checkin.Temprature, checkin.IsCheckIns, checkin.IsCheckOuts, checkin.CreatedAt, checkin.UpdatedAt)
+	_, errExec := statement.Exec(checkin.ID, checkin.Attendance.ID, checkin.Temprature, checkin.IsCheckIns, checkin.IsCheckOuts, checkin.CreatedAt, checkin.UpdatedAt)
 	if errExec != nil {
 		return checkin, errExec
 	}
@@ -179,7 +172,7 @@ func (cr *checkInOutRepo) CheckOut(userID string, checkinout checkinEntities.Che
 		return checkinout, err
 	}
 
-	result, errExec := statement.Exec(checkinout.IsCheckOuts, checkinout.UpdatedAt, checkinout.ID, checkinout.AttendanceID, userID)
+	result, errExec := statement.Exec(checkinout.IsCheckOuts, checkinout.UpdatedAt, checkinout.ID, checkinout.Attendance.ID, userID)
 	if errExec != nil {
 		return checkinout, errExec
 	}

@@ -89,8 +89,8 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&input)
 
-	userRequest := ch.checkInOutService.CheckRequest(userID, input.AttendanceID)
-	if userRequest > 0 {
+	userRequest, _ := ch.checkInOutService.CheckRequest(input.AttendanceID)
+	if userRequest.Attendance.Employee.ID != userID || userRequest.Attendance.Status != "approved" {
 		response, _ := json.Marshal(utils.APIResponse("you don't have permission to check-ins in this presence", http.StatusForbidden, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
