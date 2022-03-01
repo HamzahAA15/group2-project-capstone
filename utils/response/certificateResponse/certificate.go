@@ -29,6 +29,8 @@ func FormatCertificate(certificate certificateEntities.Certificate) CertificateR
 type CertificatesResponse struct {
 	UserID       string                `json:"user_id"`
 	UserName     string                `json:"user_name"`
+	UserAvatar   string                `json:"user_avatar"`
+	UserEmail    string                `json:"user_email"`
 	Certificates []CertificateResponse `json:"certificates"`
 }
 
@@ -43,6 +45,8 @@ func FormatCertificates(certificate certificateEntities.Certificates) Certificat
 	formatter := CertificatesResponse{
 		UserID:       certificate.User.ID,
 		UserName:     certificate.User.Name,
+		UserAvatar:   certificate.User.Avatar,
+		UserEmail:    certificate.User.Email,
 		Certificates: data,
 	}
 
