@@ -18,7 +18,7 @@ type CheckInsOutsResponse struct {
 func FormatCheckInsOuts(checkinsouts checkinEntities.Checkin) CheckInsOutsResponse {
 	fomatter := CheckInsOutsResponse{
 		ID:           checkinsouts.ID,
-		AttendanceID: checkinsouts.AttendanceID,
+		AttendanceID: checkinsouts.Attendance.ID,
 		Temprature:   checkinsouts.Temprature,
 		IsCheckIns:   checkinsouts.IsCheckIns,
 		IsCheckOuts:  checkinsouts.IsCheckOuts,
