@@ -21,6 +21,7 @@ type AttUpdateResponse struct {
 type AttGetResponse struct {
 	ID       string    `json:"id"`
 	Day      time.Time `json:"day"`
+	OfficeId string    `json:"office_id"`
 	Office   string    `json:"office"`
 	Avatar   string    `json:"user_avatar"`
 	Email    string    `json:"user_email"`
@@ -35,6 +36,7 @@ func FormatGetAtt(att attendanceEntities.Attendance) AttGetResponse {
 	fomatter := AttGetResponse{
 		ID:       att.ID,
 		Day:      att.Day.Date,
+		OfficeId: att.OfficeId,
 		Office:   att.Office,
 		Avatar:   att.Employee.Avatar,
 		Email:    att.Employee.Email,

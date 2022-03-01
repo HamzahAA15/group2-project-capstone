@@ -28,7 +28,7 @@ func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order s
 	var query string
 	query = `
 		SELECT
-			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
+			attendances.id, day.date AS date, office.id AS office_id, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
 			attendances
 		LEFT JOIN
@@ -50,7 +50,7 @@ func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order s
 	for result.Next() {
 		var attendance attendanceEntities.Attendance
 
-		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
+		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.OfficeId, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
 
 		if errScan != nil {
 			return attendances, errScan
@@ -70,7 +70,7 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 	var query string
 	query = `
 		SELECT
-			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
+			attendances.id, day.date AS date, office.id, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
 			attendances
 		LEFT JOIN
@@ -92,7 +92,7 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 	for result.Next() {
 		var attendance attendanceEntities.Attendance
 
-		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
+		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.OfficeId, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
 
 		if errScan != nil {
 			return attendances, errScan
