@@ -29,9 +29,9 @@ func (cs *checkinoutService) GetByUser(userID string) ([]checkinEntities.Checkin
 	return checkinsout, err
 }
 
-func (cs *checkinoutService) CheckRequest(userID string, attendanceID string) int {
-	countData := cs.checkinoutRepository.CheckRequest(userID, attendanceID)
-	return countData
+func (cs *checkinoutService) CheckRequest(attendanceID string) (checkinEntities.Checkin, error) {
+	countData, err := cs.checkinoutRepository.CheckRequest(attendanceID)
+	return countData, err
 }
 
 func (cs *checkinoutService) CheckData(userID string, attendanceID string) int {
@@ -42,7 +42,7 @@ func (cs *checkinoutService) CheckData(userID string, attendanceID string) int {
 func (cs *checkinoutService) Checkin(input checkInsOutsRequest.CheckInsRequest) (checkinEntities.Checkin, error) {
 	checkins := checkinEntities.Checkin{}
 	checkins.ID = uuid.New().String()
-	checkins.AttendanceID = input.AttendanceID
+	checkins.Attendance.ID = input.AttendanceID
 	checkins.Temprature = input.Temprature
 	checkins.IsCheckIns = true
 	checkins.IsCheckOuts = false
@@ -56,7 +56,7 @@ func (cs *checkinoutService) Checkin(input checkInsOutsRequest.CheckInsRequest) 
 func (cs *checkinoutService) Checkout(userID string, input checkInsOutsRequest.CheckOutsRequest) (checkinEntities.Checkin, error) {
 	checkouts := checkinEntities.Checkin{}
 	checkouts.ID = input.ID
-	checkouts.AttendanceID = input.AttendanceID
+	checkouts.Attendance.ID = input.AttendanceID
 	checkouts.IsCheckOuts = true
 	checkouts.UpdatedAt = time.Now()
 
