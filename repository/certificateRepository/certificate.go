@@ -22,7 +22,7 @@ func (cr *certificateRepo) GetCertificates(orderBy string) ([]certificateEntitie
 
 	resultUser, errUser := cr.db.Query(fmt.Sprintf(`
 	SELECT 
-		users.id, users.name
+		users.id, users.name, users.avatar, users.email
 	FROM 
 		users
 	LEFT JOIN
@@ -38,7 +38,7 @@ func (cr *certificateRepo) GetCertificates(orderBy string) ([]certificateEntitie
 	for resultUser.Next() {
 		var user certificateEntities.Certificates
 
-		errScanUser := resultUser.Scan(&user.User.ID, &user.User.Name)
+		errScanUser := resultUser.Scan(&user.User.ID, &user.User.Name, &user.User.Avatar, &user.User.Email)
 		if errScanUser != nil {
 			return result, errScanUser
 		}
