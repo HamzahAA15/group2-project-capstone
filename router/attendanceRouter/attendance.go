@@ -21,6 +21,7 @@ func (ar AttResource) AttRoute(attRepo attendanceRepository.AttendanceRepoInterf
 
 	router := mux.NewRouter()
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(attHandler.GetAttendances))).Methods("GET")
+	router.Handle("/rangedate", middleware.Authentication(http.HandlerFunc(attHandler.GetAttendancesRangeDate))).Methods("GET")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(attHandler.CreateAttendance))).Methods("POST")
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(attHandler.UpdateAttendance))).Methods("PUT")
 	return router

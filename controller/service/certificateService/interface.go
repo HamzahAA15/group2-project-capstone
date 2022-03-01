@@ -6,7 +6,7 @@ import (
 )
 
 type CertificateServiceInterface interface {
-	GetCertificates(officeId string) ([]certificateEntities.Certificate, error)
+	GetCertificates(orderBy string) ([]certificateEntities.Certificates, error)
 	GetCertificate(id string) (certificateEntities.Certificate, error)
 	GetCertificateUser(userId string) ([]certificateEntities.Certificate, error)
 	CountVaccineAccept(userID string, dossage int) int
