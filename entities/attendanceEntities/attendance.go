@@ -9,6 +9,7 @@ import (
 type Attendance struct {
 	ID        string
 	Day       dayEntities.Day
+	OfficeId  string
 	Office    string
 	Employee  userEntities.User
 	Status    string
