@@ -195,17 +195,15 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 	user := middleware.ForContext(ctx)
 	maxSize := int64(5120000)
 
-	err := r.ParseMultipartForm(maxSize)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v", maxSize), http.StatusUnprocessableEntity, false, nil))
+	file, fileHeader, err := r.FormFile("avatar")
+	if fileHeader.Size > maxSize {
+		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
 		return
 	}
-
-	file, fileHeader, err := r.FormFile("avatar")
 	if err != nil {
 		response, _ := json.Marshal(utils.APIResponse("Could not get uploaded file", http.StatusBadRequest, false, nil))
 

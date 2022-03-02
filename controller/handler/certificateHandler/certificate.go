@@ -2,6 +2,7 @@ package certificateHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"sirclo/project-capstone/controller/service/certificateService"
@@ -102,19 +103,17 @@ func (ch *certificateHandler) GetCertificateUserHandler(w http.ResponseWriter, r
 func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
-	maxSize := int64(2048000)
+	maxSize := int64(5120000)
 
-	err := r.ParseMultipartForm(maxSize)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Image too large. Max Size", http.StatusUnprocessableEntity, false, nil))
+	file, fileHeader, err := r.FormFile("image")
+	if fileHeader.Size > maxSize {
+		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
 		return
 	}
-
-	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
 		response, _ := json.Marshal(utils.APIResponse("Could not get uploaded file", http.StatusBadRequest, false, nil))
 
