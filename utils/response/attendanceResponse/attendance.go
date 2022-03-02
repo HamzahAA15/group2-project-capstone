@@ -32,6 +32,11 @@ type AttGetResponse struct {
 	Admin    string    `json:"admin"`
 }
 
+type AttGetUserResp struct {
+	AttGetResponse []AttGetResponse `json:"current_attendances"`
+	Total          int              `json:"total"`
+}
+
 func FormatGetAtt(att attendanceEntities.Attendance) AttGetResponse {
 	fomatter := AttGetResponse{
 		ID:       att.ID,

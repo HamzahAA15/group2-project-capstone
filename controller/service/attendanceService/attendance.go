@@ -38,8 +38,8 @@ func (as *attendanceService) GetAttendancesRangeDate(employee, dateStart, dateEn
 	return attendances, nil
 }
 
-func (as *attendanceService) GetAttendancesCurrentUser(userId, order string) ([]attendanceEntities.Attendance, error) {
-	attendances, err := as.attRepo.GetAttendancesCurrentUser(userId, order)
+func (as *attendanceService) GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.GetAttendancesCurrentUser(userId, status, order)
 	if err != nil {
 		return attendances, err
 	}

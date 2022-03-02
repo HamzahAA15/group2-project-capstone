@@ -103,8 +103,9 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 	return attendances, nil
 }
 
-func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, order string) ([]attendanceEntities.Attendance, error) {
+func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
+	convStatus := "%" + status + "%"
 	var query string
 	query = `
 		SELECT
@@ -120,9 +121,9 @@ func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, order string) ([]att
 		LEFT JOIN
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
-			user.id = ?
+			user.id = ? AND attendances.status LIKE ?
 		ORDER BY attendances.created_at %s`
-	result, err := ar.db.Query(fmt.Sprintf(query, order), userId)
+	result, err := ar.db.Query(fmt.Sprintf(query, order), userId, convStatus)
 	if err != nil {
 		return attendances, err
 	}
