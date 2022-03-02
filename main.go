@@ -35,15 +35,8 @@ func main() {
 	var attRepo attendanceRepository.AttendanceRepoInterface
 	var checkinsRepo checkInOutRepository.CheckInOutRepoInterface
 
-	dbMysql := database.MySQLConnection(fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=%s&loc=%s",
-		os.Getenv("mysqlUser"),
-		os.Getenv("mysqlPassword"),
-		os.Getenv("mysqlHost"),
-		os.Getenv("mysqlPort"),
-		os.Getenv("mysqlName"),
-		os.Getenv("mysqlParsetime"),
-		os.Getenv("mysqlTimeLocation"),
-	))
+	dbMysql := database.MySQLConnection()
+
 	defer dbMysql.Close()
 
 	userRepo = userRepository.NewMySQLUserRepository(dbMysql)
@@ -62,11 +55,6 @@ func main() {
 		checkinsRepo,
 	)
 
-	// http.Handle("/", accessControl(router))
-	// credentials := handlers.AllowCredentials()
-	// origins := handlers.AllowedOrigins([]string{"*"})
-	// methods := handlers.AllowedMethods([]string{"*"})
-
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},                                       // All origins
 		AllowedMethods: []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"}, // Allowing only get, just an example
@@ -76,7 +64,8 @@ func main() {
 
 	errs := make(chan error, 2)
 	go func() {
-		fmt.Println("Listening on port : ", httpPort())
+		fmt.Println("Connecting to Database")
+		fmt.Println("Listening on port", httpPort())
 		errs <- http.ListenAndServe(httpPort(), c.Handler(router))
 	}()
 

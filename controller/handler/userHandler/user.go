@@ -193,7 +193,7 @@ func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request)
 func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
-	maxSize := int64(2048000)
+	maxSize := int64(5120000)
 
 	err := r.ParseMultipartForm(maxSize)
 	if err != nil {
