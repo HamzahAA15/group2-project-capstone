@@ -100,7 +100,7 @@ func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 }
 
 func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error) {
-	query := `INSERT INTO users (id, avatar, nik, email, password, name, phone, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (id, office_id, avatar, nik, email, password, name, phone, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	statement, err := ur.db.Prepare(query)
 	if err != nil {
@@ -109,7 +109,7 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.ID, user.Avatar, user.Nik, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)
+	_, err = statement.Exec(user.ID, "b4fbfe81-8889-4ea3-98d5-f77736d0aa9e", user.Avatar, user.Nik, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
