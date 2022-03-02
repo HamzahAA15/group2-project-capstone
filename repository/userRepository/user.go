@@ -109,9 +109,13 @@ func (ur *userRepo) CreateUser(user userEntities.User) (userEntities.User, error
 
 	defer statement.Close()
 
-	_, err = statement.Exec(user.ID, "b4fbfe81-8889-4ea3-98d5-f77736d0aa9e", user.Avatar, user.Nik, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)        if err != nil {
-		return user, err
-	}
+	_, err = statement.Exec(user.ID, "b4fbfe81-8889-4ea3-98d5-f77736d0aa9e", user.Avatar, user.Nik, user.Email, user.Password, user.Name, user.Phone, user.Role, user.CreatedAt, user.UpdatedAt)        
+   
+
+    if err != nil {
+        return user, err
+    }
+
 
 	return user, nil
 }
