@@ -95,6 +95,7 @@ func (ah *attHandler) GetAttendancesRangeDate(w http.ResponseWriter, r *http.Req
 
 func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
+	status := queryParams.Get("status")
 	order := queryParams.Get("order")
 	if order == "" {
 		order = "asc"
@@ -102,7 +103,7 @@ func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
 
-	attendances, err := ah.attService.GetAttendancesCurrentUser(user.ID, order)
+	attendances, err := ah.attService.GetAttendancesCurrentUser(user.ID, status, order)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -111,13 +112,18 @@ func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.R
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default:
+		var count int
+		var dataMain attendanceResponse.AttGetUserResp
 		var data []attendanceResponse.AttGetResponse
 		for _, val := range attendances {
 			attFormatter := attendanceResponse.FormatGetAtt(val)
 			data = append(data, attFormatter)
+			count++
 		}
+		dataMain.AttGetResponse = data
+		dataMain.Total = count
 
-		response, _ := json.Marshal(utils.APIResponse("Success Get Attendances Data", http.StatusOK, true, data))
+		response, _ := json.Marshal(utils.APIResponse("Success Get Attendances Data", http.StatusOK, true, dataMain))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
