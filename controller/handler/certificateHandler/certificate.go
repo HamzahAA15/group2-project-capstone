@@ -199,6 +199,17 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 	var input certificateRequest.CertificateUploadRequest
 	json.NewDecoder(r.Body).Decode(&input)
 
+	dataVaccine, _ := ch.certificateService.GetCertificate(id)
+	countDosage := ch.certificateService.GetVaccineDose(dataVaccine.User.ID)
+	if dataVaccine.Dosage < countDosage || (dataVaccine.Dosage <= countDosage && dataVaccine.Status == "rejected") {
+		response, _ := json.Marshal(utils.APIResponse("you cannot update this data again", http.StatusBadRequest, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response)
+		return
+	}
+
 	errValidation := validation.CheckEmpty(input.Status)
 	if errValidation != nil {
 		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
