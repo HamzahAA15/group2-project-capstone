@@ -12,6 +12,7 @@ import (
 	"sirclo/project-capstone/utils/request/userRequest"
 	"sirclo/project-capstone/utils/response/userResponse"
 	"sirclo/project-capstone/utils/upload"
+	"sirclo/project-capstone/utils/validation"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -30,9 +31,11 @@ func NewUserHandler(userService userService.UserServiceInterface) UserHandlerInt
 
 func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input userRequest.LoginUserInput
-	err := json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Login Failed", http.StatusUnprocessableEntity, false, nil))
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.Identity, input.Password)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -195,74 +198,59 @@ func (uh *userHandler) UploadFileHandler(w http.ResponseWriter, r *http.Request)
 	user := middleware.ForContext(ctx)
 	maxSize := int64(5120000)
 
-	err := r.ParseMultipartForm(maxSize)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write(response)
-		return
-	}
 	file, fileHeader, err := r.FormFile("avatar")
-	if fileHeader.Size > maxSize {
-		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
+	switch err {
+	case http.ErrMissingFile:
+		response, _ := json.Marshal(utils.APIResponse("there are no files to upload", http.StatusUnprocessableEntity, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
 		return
-	}
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Could not get uploaded file", http.StatusBadRequest, false, nil))
+	default:
+		if fileHeader.Size > maxSize {
+			response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write(response)
+			return
+		}
+
+		defer file.Close()
+
+		s, _ := session.NewSession(&aws.Config{
+			Region: aws.String(os.Getenv("REGION")),
+			Credentials: credentials.NewStaticCredentials(
+				os.Getenv("KEYID"),
+				os.Getenv("SECRETKEY"),
+				""),
+		})
+
+		fileLoc, errExtension := upload.UploadFile(user.ID, "users", s, file, fileHeader)
+		if errExtension != nil {
+			response, _ := json.Marshal(utils.APIResponse("file extension isn't equal to .png, .jpg. and .jpeg", http.StatusBadRequest, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response)
+			return
+		}
+
+		err_upload := uh.userService.UploadAvatarUser(user.ID, fileLoc)
+		if err_upload != nil {
+			response, _ := json.Marshal(utils.APIResponse("failed to upload photo", http.StatusInternalServerError, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(response)
+			return
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		w.Write(response)
-		return
 	}
-
-	defer file.Close()
-
-	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("REGION")),
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("KEYID"),
-			os.Getenv("SECRETKEY"),
-			""),
-	})
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Could not uploaded file", http.StatusBadRequest, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response)
-		return
-	}
-
-	fileLoc, err := upload.UploadFile(user.ID, "users", s, file, fileHeader)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("file extension isn't equal to .png, .jpg. and .jpeg", http.StatusBadRequest, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response)
-		return
-	}
-
-	err_upload := uh.userService.UploadAvatarUser(user.ID, fileLoc)
-	if err_upload != nil {
-		response, _ := json.Marshal(utils.APIResponse("failed to upload photo", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-		return
-	}
-
-	response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
 }

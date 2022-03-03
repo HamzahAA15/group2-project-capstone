@@ -2,7 +2,6 @@ package attendanceHandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/attendanceService"
 	"sirclo/project-capstone/controller/service/userService"
@@ -10,6 +9,7 @@ import (
 	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/attendanceRequest"
 	"sirclo/project-capstone/utils/response/attendanceResponse"
+	"sirclo/project-capstone/utils/validation"
 )
 
 type attHandler struct {
@@ -136,14 +136,22 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 	user := middleware.ForContext(ctx)
 
 	var input attendanceRequest.CreateAttRequest
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.Day)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	attCreate, err := ah.attService.CreateAttendance(user.ID, input)
-	fmt.Println("err hnd: ", err)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -174,13 +182,22 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input attendanceRequest.UpdateAttRequest
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.ID, input.Status)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	attUpdate, err := ah.attService.UpdateAttendance(user.ID, input)
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
