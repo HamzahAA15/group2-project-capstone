@@ -9,6 +9,7 @@ import (
 	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/dayRequest"
 	"sirclo/project-capstone/utils/response/dayResponse"
+	"sirclo/project-capstone/utils/validation"
 )
 
 type dayHandler struct {
@@ -66,8 +67,17 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var input dayRequest.DayUpdateRequest
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.ID, input.Quota)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	dayUpdate, err := dh.dayService.UpdateDays(input)
 	switch {

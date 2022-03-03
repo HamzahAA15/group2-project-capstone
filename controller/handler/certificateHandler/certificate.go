@@ -1,6 +1,7 @@
 package certificateHandler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"sirclo/project-capstone/utils/request/certificateRequest"
 	"sirclo/project-capstone/utils/response/certificateResponse"
 	"sirclo/project-capstone/utils/upload"
+	"sirclo/project-capstone/utils/validation"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -105,92 +107,77 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 	user := middleware.ForContext(ctx)
 	maxSize := int64(5120000)
 
-	err := r.ParseMultipartForm(maxSize)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write(response)
-		return
-	}
 	file, fileHeader, err := r.FormFile("image")
-	if fileHeader.Size > maxSize {
-		response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
+	switch err {
+	case http.ErrMissingFile:
+		response, _ := json.Marshal(utils.APIResponse("there are no files to upload", http.StatusUnprocessableEntity, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write(response)
 		return
-	}
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Could not get uploaded file", http.StatusBadRequest, false, nil))
+	default:
+		if fileHeader.Size > maxSize {
+			response, _ := json.Marshal(utils.APIResponse(fmt.Sprintf("Image too large. Max Size: %v Kb", maxSize), http.StatusUnprocessableEntity, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write(response)
+			return
+		}
+
+		defer file.Close()
+
+		s, _ := session.NewSession(&aws.Config{
+			Region: aws.String(os.Getenv("REGION")),
+			Credentials: credentials.NewStaticCredentials(
+				os.Getenv("KEYID"),
+				os.Getenv("SECRETKEY"),
+				""),
+		})
+
+		fileLoc, errExtension := upload.UploadFile(user.ID+time.Now().Format("20060102150405"), "certificates", s, file, fileHeader)
+		if errExtension != nil {
+			response, _ := json.Marshal(utils.APIResponse("file extension isn't equal to .png, .jpg. and .jpeg", http.StatusBadRequest, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response)
+			return
+		}
+
+		countDosage := ch.certificateService.GetVaccineDose(user.ID) + 1
+		countVaccine := ch.certificateService.CountVaccineAccept(user.ID, countDosage)
+		if countVaccine > 0 {
+			response, _ := json.Marshal(utils.APIResponse("Please wait till your vaccine certificate has been verified by Admin.", http.StatusBadRequest, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response)
+			return
+		}
+
+		input := certificateRequest.CertificateUploadRequest{
+			Image:  fileLoc,
+			Dosage: countDosage,
+		}
+
+		err_upload := ch.certificateService.UploadCertificateVaccine(user.ID, input)
+		if err_upload != nil {
+			response, _ := json.Marshal(utils.APIResponse("failed to upload image", http.StatusInternalServerError, false, nil))
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(response)
+			return
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		w.Write(response)
-		return
 	}
-
-	defer file.Close()
-
-	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("REGION")),
-		Credentials: credentials.NewStaticCredentials(
-			os.Getenv("KEYID"),
-			os.Getenv("SECRETKEY"),
-			""),
-	})
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("Could not uploaded file", http.StatusBadRequest, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response)
-		return
-	}
-
-	fileLoc, err := upload.UploadFile(user.ID+time.Now().Format("20060102150405"), "certificates", s, file, fileHeader)
-	if err != nil {
-		response, _ := json.Marshal(utils.APIResponse("file extension isn't equal to .png, .jpg. and .jpeg", http.StatusBadRequest, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response)
-		return
-	}
-
-	countDosage := ch.certificateService.GetVaccineDose(user.ID) + 1
-	countVaccine := ch.certificateService.CountVaccineAccept(user.ID, countDosage)
-	if countVaccine > 0 {
-		response, _ := json.Marshal(utils.APIResponse("Please wait till your vaccine certificate has been verified by Admin.", http.StatusBadRequest, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response)
-		return
-	}
-
-	input := certificateRequest.CertificateUploadRequest{
-		Image:  fileLoc,
-		Dosage: countDosage,
-	}
-
-	err_upload := ch.certificateService.UploadCertificateVaccine(user.ID, input)
-	if err_upload != nil {
-		response, _ := json.Marshal(utils.APIResponse("failed to upload image", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-		return
-	}
-
-	response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
 }
 
 func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r *http.Request) {
@@ -210,12 +197,37 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 	}
 
 	var input certificateRequest.CertificateUploadRequest
+	json.NewDecoder(r.Body).Decode(&input)
 
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	dataVaccine, _ := ch.certificateService.GetCertificate(id)
+	countDosage := ch.certificateService.GetVaccineDose(dataVaccine.User.ID)
+	if dataVaccine.Dosage < countDosage || (dataVaccine.Dosage <= countDosage && dataVaccine.Status == "rejected") {
+		response, _ := json.Marshal(utils.APIResponse("you cannot update this data again", http.StatusBadRequest, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response)
+		return
+	}
+
+	errValidation := validation.CheckEmpty(input.Status)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	_, err := ch.certificateService.VerifyCertificate(id, userID, input)
 	switch {
+	case err == sql.ErrNoRows: //check data is null?
+		response, _ := json.Marshal(utils.APIResponse("Data Not Found", http.StatusNotFound, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(response)
 	case err != nil: // error internal server
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
 
