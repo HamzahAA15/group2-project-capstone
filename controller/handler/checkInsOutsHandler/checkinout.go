@@ -8,6 +8,7 @@ import (
 	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/checkInsOutsRequest"
 	"sirclo/project-capstone/utils/response/checkinsoutsResponse"
+	"sirclo/project-capstone/utils/validation"
 )
 
 type checkInOutHandler struct {
@@ -86,8 +87,17 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 	userID := middleware.ForContext(ctx).ID
 
 	var input checkInsOutsRequest.CheckInsRequest
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.AttendanceID, input.Temprature)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	userRequest, _ := ch.checkInOutService.CheckRequest(input.AttendanceID)
 	if userRequest.Attendance.Employee.ID != userID || userRequest.Attendance.Status != "approved" {
@@ -132,8 +142,17 @@ func (ch *checkInOutHandler) CheckoutsHandler(w http.ResponseWriter, r *http.Req
 	userID := middleware.ForContext(ctx).ID
 
 	var input checkInsOutsRequest.CheckOutsRequest
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.ID, input.AttendanceID)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	_, err := ch.checkInOutService.Checkout(userID, input)
 	switch {
