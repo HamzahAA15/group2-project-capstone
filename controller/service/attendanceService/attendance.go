@@ -1,7 +1,6 @@
 package attendanceService
 
 import (
-	"fmt"
 	"sirclo/project-capstone/entities/attendanceEntities"
 	"sirclo/project-capstone/repository/attendanceRepository"
 	"sirclo/project-capstone/repository/userRepository"
@@ -24,26 +23,17 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 
 func (as *attendanceService) GetAttendances(employee, date, status, office, order string) ([]attendanceEntities.Attendance, error) {
 	attendances, err := as.attRepo.GetAttendances(employee, date, status, office, order)
-	if err != nil {
-		return attendances, err
-	}
-	return attendances, nil
+	return attendances, err
 }
 
 func (as *attendanceService) GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
 	attendances, err := as.attRepo.GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order)
-	if err != nil {
-		return attendances, err
-	}
-	return attendances, nil
+	return attendances, err
 }
 
 func (as *attendanceService) GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error) {
 	attendances, err := as.attRepo.GetAttendancesCurrentUser(userId, status, order)
-	if err != nil {
-		return attendances, err
-	}
-	return attendances, nil
+	return attendances, err
 }
 
 func (as *attendanceService) CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error) {
@@ -53,11 +43,7 @@ func (as *attendanceService) CreateAttendance(loginId string, input attendanceRe
 	attendance.Employee.ID = loginId
 
 	createAttendance, err := as.attRepo.CreateAttendance(attendance)
-	if err != nil {
-		return attendance, err
-	}
-	fmt.Println("err svc: ", err)
-	return createAttendance, nil
+	return createAttendance, err
 }
 
 func (as *attendanceService) UpdateAttendance(loginId string, input attendanceRequest.UpdateAttRequest) (attendanceEntities.Attendance, error) {
@@ -69,10 +55,7 @@ func (as *attendanceService) UpdateAttendance(loginId string, input attendanceRe
 	attendance.Admin.ID = loginId
 
 	updateAttendance, err := as.attRepo.UpdateAttendance(attendance)
-	if err != nil {
-		return attendance, err
-	}
-	return updateAttendance, nil
+	return updateAttendance, err
 }
 
 func (as *attendanceService) CheckUserRole(loginId string) string {

@@ -21,24 +21,17 @@ func NewDayService(dayRepo dayRepository.DayRepoInterface, userRepo userReposito
 
 func (ds *dayService) GetDays(office, time string) ([]dayEntities.Day, error) {
 	days, err := ds.dayRepository.GetDays(office, time)
-	if err != nil {
-		return days, err
-	}
-	return days, nil
+	return days, err
 }
 
 func (ds *dayService) UpdateDays(input dayRequest.DayUpdateRequest) (dayEntities.Day, error) {
-
 	var day dayEntities.Day
 
 	day.ID = input.ID
 	day.Quota = input.Quota
 
 	updateDay, err := ds.dayRepository.UpdateDay(day)
-	if err != nil {
-		return updateDay, err
-	}
-	return updateDay, nil
+	return updateDay, err
 }
 
 func (ds *dayService) CheckUserRole(loginId string) string {
