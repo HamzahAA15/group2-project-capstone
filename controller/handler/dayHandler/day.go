@@ -26,9 +26,10 @@ func NewDayHandler(dayService dayService.DayServiceInterface, userService userSe
 
 func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
-	office := queryParams.Get("office_id")
-	time := queryParams.Get("date")
-	days, err := dh.dayService.GetDays(office, time)
+	officeID := queryParams.Get("office_id")
+	date := queryParams.Get("date")
+
+	days, err := dh.dayService.GetDays(officeID, date)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -54,10 +55,10 @@ func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 
 func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user := middleware.ForContext(ctx)
+	userID := middleware.ForContext(ctx).ID
 
-	checkUserRole := dh.dayService.CheckUserRole(user.ID)
-	if checkUserRole != "admin" {
+	user, _ := dh.userService.GetUser(userID)
+	if user.Role != "admin" {
 		response, _ := json.Marshal(utils.APIResponse("You are not admin", http.StatusUnauthorized, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")

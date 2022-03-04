@@ -150,9 +150,7 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	user := middleware.ForContext(ctx)
 
 	var input userRequest.UpdateUserInput
-
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
 
 	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
 	switch {
@@ -165,27 +163,6 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	default: // default response success
 		formatter := userResponse.FormatUser(userUpdate)
 		response, _ := json.Marshal(utils.APIResponse("Success Update User Data", http.StatusOK, true, formatter))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
-	}
-}
-
-func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user := middleware.ForContext(ctx)
-
-	err := uh.userService.DeleteUser(user.ID)
-	switch {
-	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-	default: // default response success
-		response, _ := json.Marshal(utils.APIResponse("Success Delete User Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
