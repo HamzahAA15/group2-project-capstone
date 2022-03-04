@@ -4,7 +4,7 @@
 <br/>
 <div align="center">
   <a href="">
-    <img src="images/logo-black.png" alt="Logo">
+    <img src="images/Logo-black.png" alt="Logo" height="200" width="200">
   </a>
   <p align="center">
     Pembangunan RESTful API menggunakan Gorilla Mux(router) & RS Cors(cors)
@@ -30,16 +30,18 @@
 <summary>ERD</summary>
 <img src="images/capstone-project.jpg">
 </details>
-      <details>
+<details>
 <summary>🧑‍💼🙎 &nbsp;Users</summary>
   
 | Feature User | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| --- | --- | --- | --- | --- | --- |
-| POST | /signin | - | - | NO |  |
-| POST | /signup  | - | - | NO |  |
-| GET | /users | - | - | YES |  |
-| PUT | /users | - | - | YES |  | 
-| DEL | /users | - | - | YES |  |
+| ------------ | ---------| ----------- | ------------ | --------- | ------ |
+| POST         | /users/login | - | email, nik, & password | NO |  |
+| POST         | /users/register  | - | - | NO |  |
+| POST         | /users/avatar  | - | - | YES |  |
+| GET          | /users/ | - | - | YES |  |
+| GET          | /users/profile | - | - | YES |  |
+| PUT          | /users/ | - | - | YES |  | 
+| DEL          | /users/ | - | - | YES |  |
 
 </details>
 
@@ -48,7 +50,7 @@
   
 | Feature Office | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
 | --- | --- | --- | --- | --- | --- |
-| - | - | - | - | - | - |
+| GET | /offices/ | - | - | YES |  |
 
 </details>
 
@@ -64,29 +66,38 @@
 <details>
 <summary>🗓&nbsp;Day</summary>
 
-| Feature Day | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ----------- | -------- | ----------- | ------------ | --------- | ------ |
-| -           | -        | -           | -            | -         | -      |
+| Feature Day | Endpoint | Query Param | Request Body | JWT Token       | Fungsi |
+| ----------- | -------- | ----------- | ------------ | --------------- | ------ |
+| GET         | -        | -           | -            | YES             | -      |
+| POST        | -        | -           | -            | YES(only admin) | -      |
 
 </details>
 
 <details>
 <summary>💉&nbsp;Vaccine Certificates</summary>
 
-| Feature Certificates | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| -------------------- | -------- | ----------- | ------------ | --------- | ------ |
-| -                    | -        | -           | -            | -         | -      |
+| Feature Certificates | Endpoint           | Query Param | Request Body | JWT Token | Fungsi |
+| -------------------- | ------------------ | ----------- | ------------ | --------- | ------ |
+| GET                  | /certificates/     | -           | -            | YES       | -      |
+| GET                  | /certificates/user | -           | -            | YES       | -      |
+| POST                 | /certificates/     | -           | -            | YES       | -      |
+| PUT                  | /certificates/{id} | -           | -            | YES       | -      |
 
 </details>
 
 <details>
 <summary>⏱️&nbsp;Checkins</summary>
 
-| Feature Checkins | Endpoint | Query Param | Request Body | JWT Token | Fungsi |
-| ---------------- | -------- | ----------- | ------------ | --------- | ------ |
-| -                | -        | -           | -            | -         | -      |
+| Feature Checkins | Endpoint    | Query Param | Request Body | JWT Token | Fungsi |
+| ---------------- | ----------- | ----------- | ------------ | --------- | ------ |
+| GET              | /check/     | -           | -            | YES       | -      |
+| GET              | /check/user | -           | -            | YES       | -      |
+| POST             | /check/ins  | -           | -            | YES       | -      |
+| POST             | /check/outs | -           | -            | YES       | -      |
 
 </details>
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- CONTACT -->
 
@@ -116,13 +127,14 @@ isi .env nya
 go run main.go
 ```
 
-## Contact
+# Contact
 
 [![Linkedin](https://img.shields.io/badge/-Jundana-white?style=flat&logo=linkedin&logoColor=blue)](https://www.linkedin.com/in/jundanaalbasyir/)
-[![GitHub](https://img.shields.io/badge/-Jundana-white?style=flat&logo=github&logoColor=black)](https://github.com/justjundana)
-
 [![Linkedin](https://img.shields.io/badge/-Hamzah-white?style=flat&logo=linkedin&logoColor=blue)](https://www.linkedin.com/in/hamzahaalfauzi/)
+[![GitHub](https://img.shields.io/badge/-Jundana-white?style=flat&logo=github&logoColor=black)](https://github.com/justjundana)
 [![GitHub](https://img.shields.io/badge/-Hamzah-white?style=flat&logo=github&logoColor=black)](https://github.com/HamzahAA15)
 
 <p align="center">:copyright JH Top Golang Dev</p>
 </h3>
+
+<p align="right">(<a href="#top">back to top</a>)</p>
