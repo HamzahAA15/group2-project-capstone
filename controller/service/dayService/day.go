@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/repository/dayRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	"sirclo/project-capstone/utils/request/dayRequest"
+	"time"
 )
 
 type dayService struct {
@@ -19,8 +20,8 @@ func NewDayService(dayRepo dayRepository.DayRepoInterface, userRepo userReposito
 	}
 }
 
-func (ds *dayService) GetDays(office, time string) ([]dayEntities.Day, error) {
-	days, err := ds.dayRepository.GetDays(office, time)
+func (ds *dayService) GetDays(officeID string, date string) ([]dayEntities.Day, error) {
+	days, err := ds.dayRepository.GetDays(officeID, date)
 	return days, err
 }
 
@@ -29,6 +30,7 @@ func (ds *dayService) UpdateDays(input dayRequest.DayUpdateRequest) (dayEntities
 
 	day.ID = input.ID
 	day.Quota = input.Quota
+	day.UpdatedAt = time.Now()
 
 	updateDay, err := ds.dayRepository.UpdateDay(day)
 	return updateDay, err
