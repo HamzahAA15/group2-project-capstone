@@ -171,8 +171,15 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
 
-	checkUserRole := ah.attService.CheckUserRole(user.ID)
-	if checkUserRole != "admin" {
+	CurrentUser, err := ah.userService.GetUser(user.ID)
+	if err != nil {
+		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	}
+	if CurrentUser.Role != "admin" {
 		response, _ := json.Marshal(utils.APIResponse("You are not admin", http.StatusUnauthorized, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
