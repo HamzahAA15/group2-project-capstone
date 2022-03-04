@@ -27,6 +27,16 @@ func (as *attendanceService) GetAttendances(employee, date, status, office, orde
 }
 
 func (as *attendanceService) GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
+	if order == "" {
+		order = "desc"
+	}
+	if dateStart == "" {
+		dateStart = "2022-01-01"
+	}
+	if dateEnd == "" {
+		dateEnd = "2023-01-01"
+	}
+
 	attendances, err := as.attRepo.GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order)
 	return attendances, err
 }

@@ -60,17 +60,14 @@ func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
 
 func (ah *attHandler) GetAttendancesRangeDate(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
-	employee := queryParams.Get("employee")
+	employeeEmail := queryParams.Get("employee_email")
 	dateStart := queryParams.Get("date_start")
 	dateEnd := queryParams.Get("date_end")
 	status := queryParams.Get("status")
 	office := queryParams.Get("office")
 	order := queryParams.Get("order")
-	if order == "" {
-		order = "asc"
-	}
 
-	attendances, err := ah.attService.GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order)
+	attendances, err := ah.attService.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -98,7 +95,7 @@ func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.R
 	status := queryParams.Get("status")
 	order := queryParams.Get("order")
 	if order == "" {
-		order = "asc"
+		order = "desc"
 	}
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
