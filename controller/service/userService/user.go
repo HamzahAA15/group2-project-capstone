@@ -81,11 +81,6 @@ func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) 
 	return updateUser, err
 }
 
-func (us *userService) DeleteUser(loginId string) error {
-	err := us.userRepository.DeleteUser(loginId)
-	return err
-}
-
 func (us *userService) UploadAvatarUser(id string, imageURL string) error {
 	user, errGetUser := us.GetUser(id)
 	if errGetUser != nil {

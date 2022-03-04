@@ -11,6 +11,5 @@ type UserServiceInterface interface {
 	GetUser(id string) (userEntities.User, error)
 	CreateUser(input userRequest.CreateUserInput) (userEntities.User, error)
 	UpdateUser(id string, input userRequest.UpdateUserInput) (userEntities.User, error)
-	DeleteUser(loginId string) error
 	UploadAvatarUser(id string, imageURL string) error
 }
