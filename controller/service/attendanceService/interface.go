@@ -7,7 +7,7 @@ import (
 
 type AttServiceInterface interface {
 	GetAttendances(employee, date, status, office, order string) ([]attendanceEntities.Attendance, error)
-	GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error)
+	GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error)
 	GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error)
 	CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error)
 	UpdateAttendance(loginId string, input attendanceRequest.UpdateAttRequest) (attendanceEntities.Attendance, error)

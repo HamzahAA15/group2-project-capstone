@@ -61,14 +61,13 @@ func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order s
 	return attendances, nil
 }
 
-func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
+func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
-	convEmployee := "%" + employee + "%"
+	convEmployee := "%" + employeeEmail + "%"
 	convStatus := "%" + status + "%"
 	convOffice := "%" + office + "%"
 
-	var query string
-	query = `
+	query := `
 		SELECT
 			attendances.id, day.date AS date, office.id, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
@@ -82,7 +81,7 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employee, dateStart, dateEnd, 
 		LEFT JOIN
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
-			user.name LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.name LIKE ?
+			user.email LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.name LIKE ?
 		ORDER BY attendances.created_at %s`
 	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, dateStart, dateEnd, convStatus, convOffice)
 	if err != nil {
