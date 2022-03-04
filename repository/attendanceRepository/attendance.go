@@ -18,55 +18,11 @@ func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 	}
 }
 
-func (ar *attendanceRepo) GetAttendances(employee, date, status, office, order string) ([]attendanceEntities.Attendance, error) {
-	var attendances []attendanceEntities.Attendance
-	convEmployee := "%" + employee + "%"
-	convTime := "%" + date + "%"
-	convStatus := "%" + status + "%"
-	convOffice := "%" + office + "%"
-
-	var query string
-	query = `
-		SELECT
-			attendances.id, day.date AS date, office.id AS office_id, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
-		FROM 
-			attendances
-		LEFT JOIN
-			days AS day ON day.id = attendances.day_id
-		LEFT JOIN
-			offices AS office ON office.id = day.office_id
-		LEFT JOIN
-			users AS user ON user.id = attendances.user_id
-		LEFT JOIN
-			users AS admin ON admin.id = attendances.admin_id
-		WHERE
-			user.name LIKE ? AND day.date LIKE ? AND attendances.status LIKE ? AND office.name LIKE ?
-		ORDER BY attendances.created_at %s`
-	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, convTime, convStatus, convOffice)
-	if err != nil {
-		return attendances, err
-	}
-
-	for result.Next() {
-		var attendance attendanceEntities.Attendance
-
-		errScan := result.Scan(&attendance.ID, &attendance.Day.Date, &attendance.OfficeId, &attendance.Office, &attendance.Employee.Avatar, &attendance.Employee.Email, &attendance.Employee.Nik, &attendance.Employee.Name, &attendance.Status, &attendance.Notes, &attendance.Admin.Name)
-
-		if errScan != nil {
-			return attendances, errScan
-		}
-		attendances = append(attendances, attendance)
-
-	}
-	return attendances, nil
-}
-
-func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
+func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
 	convEmployee := "%" + employeeEmail + "%"
 	convStatus := "%" + status + "%"
-	convOffice := "%" + office + "%"
-
+	convOfficeId := "%" + officeId + "%"
 	query := `
 		SELECT
 			attendances.id, day.date AS date, office.id, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
@@ -81,9 +37,9 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, date
 		LEFT JOIN
 			users AS admin ON admin.id = attendances.admin_id
 		WHERE
-			user.email LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.name LIKE ?
+			user.email LIKE ? AND (day.date BETWEEN ? AND ?) AND attendances.status LIKE ? AND office.id LIKE ?
 		ORDER BY attendances.created_at %s`
-	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, dateStart, dateEnd, convStatus, convOffice)
+	result, err := ar.db.Query(fmt.Sprintf(query, order), convEmployee, dateStart, dateEnd, convStatus, convOfficeId)
 	if err != nil {
 		return attendances, err
 	}
@@ -105,8 +61,7 @@ func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, date
 func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
 	convStatus := "%" + status + "%"
-	var query string
-	query = `
+	query := `
 		SELECT
 			attendances.id, day.date AS date, office.name, user.avatar, user.email, user.nik, user.name as employee, attendances.status, (COALESCE(NULLIF(attendances.notes,''), '-')) AS notes, (COALESCE(NULLIF(admin.name,''), '-')) AS admin 
 		FROM 
@@ -152,7 +107,7 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 		log.Fatal(errNoRows)
 	}
 
-	errDouble := ar.db.QueryRow(`SELECT count(id) as id FROM attendances WHERE day_id = ? AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
+	errDouble := ar.db.QueryRow(`SELECT count(id) as id FROM attendances WHERE days.date = (select days.date from days where days.id = ?) AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
 	if errDouble != nil {
 		log.Fatal(errDouble)
 	}

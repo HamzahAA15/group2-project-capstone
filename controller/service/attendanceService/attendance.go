@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/repository/attendanceRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	"sirclo/project-capstone/utils/request/attendanceRequest"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -21,20 +22,16 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 	}
 }
 
-func (as *attendanceService) GetAttendances(employee, date, status, office, order string) ([]attendanceEntities.Attendance, error) {
-	attendances, err := as.attRepo.GetAttendances(employee, date, status, office, order)
-	return attendances, err
-}
-
 func (as *attendanceService) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
 	if order == "" {
 		order = "desc"
 	}
+	t := time.Now()
 	if dateStart == "" {
-		dateStart = "2022-01-01"
+		dateStart = time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location()).String()
 	}
 	if dateEnd == "" {
-		dateEnd = "2023-01-01"
+		dateEnd = time.Date(t.Year()+1, 1, 1, 0, 0, 0, 0, t.Location()).String()
 	}
 
 	attendances, err := as.attRepo.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order)

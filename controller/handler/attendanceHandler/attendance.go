@@ -24,50 +24,16 @@ func NewAttendanceHandler(attService attendanceService.AttServiceInterface, user
 	}
 }
 
-func (ah *attHandler) GetAttendances(w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	employee := queryParams.Get("employee")
-	date := queryParams.Get("date")
-	status := queryParams.Get("status")
-	office := queryParams.Get("office")
-	order := queryParams.Get("order")
-	if order == "" {
-		order = "asc"
-	}
-
-	attendances, err := ah.attService.GetAttendances(employee, date, status, office, order)
-	switch {
-	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-	default:
-		var data []attendanceResponse.AttGetResponse
-		for _, val := range attendances {
-			attFormatter := attendanceResponse.FormatGetAtt(val)
-			data = append(data, attFormatter)
-		}
-
-		response, _ := json.Marshal(utils.APIResponse("Success Get Attendances Data", http.StatusOK, true, data))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
-	}
-}
-
 func (ah *attHandler) GetAttendancesRangeDate(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	employeeEmail := queryParams.Get("employee_email")
 	dateStart := queryParams.Get("date_start")
 	dateEnd := queryParams.Get("date_end")
 	status := queryParams.Get("status")
-	office := queryParams.Get("office")
-	order := queryParams.Get("order")
+	officeId := queryParams.Get("office_id")
+	order := queryParams.Get("order_by")
 
-	attendances, err := ah.attService.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order)
+	attendances, err := ah.attService.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -93,7 +59,7 @@ func (ah *attHandler) GetAttendancesRangeDate(w http.ResponseWriter, r *http.Req
 func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	status := queryParams.Get("status")
-	order := queryParams.Get("order")
+	order := queryParams.Get("order_by")
 	if order == "" {
 		order = "desc"
 	}
