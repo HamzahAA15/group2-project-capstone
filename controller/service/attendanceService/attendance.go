@@ -22,10 +22,8 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 	}
 }
 
-func (as *attendanceService) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order string) ([]attendanceEntities.Attendance, error) {
-	if order == "" {
-		order = "desc"
-	}
+func (as *attendanceService) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
+
 	t := time.Now()
 	if dateStart == "" {
 		dateStart = time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location()).String()
@@ -34,7 +32,7 @@ func (as *attendanceService) GetAttendancesRangeDate(employeeEmail, dateStart, d
 		dateEnd = time.Date(t.Year()+1, 1, 1, 0, 0, 0, 0, t.Location()).String()
 	}
 
-	attendances, err := as.attRepo.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, office, order)
+	attendances, err := as.attRepo.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order)
 	return attendances, err
 }
 
