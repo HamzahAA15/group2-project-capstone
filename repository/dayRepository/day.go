@@ -17,28 +17,26 @@ func NewMySQLDayRepository(db *sql.DB) DayRepoInterface {
 
 func (dr *dayRepo) GetDays(office_id string, date string) ([]dayEntities.Day, error) {
 	var days []dayEntities.Day
+	convOffice := "%" + office_id + "%"
+	convTime := "%" + date + "%"
 
 	result, err := dr.db.Query(`
-	SELECT 
-		days.id, offices.name, days.date, days.quota,
+	SELECT days.id, offices.name, days.date, days.quota,
 		COUNT(attendances.day_id) AS total_approved, 
 		(days.quota-count(attendances.day_id)) AS remaining_quota 
 	FROM 
 		days
     LEFT JOIN 
 		(SELECT 
-			attendances.day_id 
-		FROM 
-			attendances 
+				attendances.day_id FROM attendances 
 		WHERE 
-			attendances.status = "approved"
-		) attendances ON attendances.day_id = days.id
+			attendances.status = "approved") attendances ON attendances.day_id = days.id
     LEFT JOIN 
 		offices ON offices.id = days.office_id
     WHERE 
-		offices.id = ? AND days.date = ?
+		offices.id LIKE ? AND days.date LIKE ?
     GROUP BY 
-		days.id ORDER BY days.date ASC`, office_id, date)
+		days.id ORDER BY days.date ASC`, convOffice, convTime)
 
 	if err != nil {
 		return days, err

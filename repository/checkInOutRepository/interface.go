@@ -4,7 +4,6 @@ import "sirclo/project-capstone/entities/checkinEntities"
 
 type CheckInOutRepoInterface interface {
 	Gets() ([]checkinEntities.Checkin, error)
-	GetByUser(userID string) ([]checkinEntities.Checkin, error)
 	CheckRequest(attendanceID string) (checkinEntities.Checkin, error)
 	CheckData(userID string, attendanceID string) int
 	CheckIn(checkinout checkinEntities.Checkin) (checkinEntities.Checkin, error)

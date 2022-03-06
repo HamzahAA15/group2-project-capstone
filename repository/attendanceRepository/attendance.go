@@ -117,7 +117,17 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 		log.Fatal(errNoRows)
 	}
 
-	errDouble := ar.db.QueryRow(`SELECT count(attendances.id) as id FROM attendances LEFT JOIN days ON days.id = attendances.day_id WHERE days.date = (select days.date from days where days.id = ?) AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
+	errDouble := ar.db.QueryRow(`
+	SELECT 
+		count(attendances.id) as id 
+	FROM 
+		attendances
+	LEFT JOIN 
+		days ON 
+			days.id = attendances.day_id
+	WHERE 
+		days.date = (SELECT 
+			days.date FROM days WHERE days.id = ?) AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
 	if errDouble != nil {
 		log.Fatal(errDouble)
 	}

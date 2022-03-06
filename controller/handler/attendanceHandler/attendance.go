@@ -115,7 +115,7 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attCreate, err := ah.attService.CreateAttendance(user.ID, input)
+	_, err := ah.attService.CreateAttendance(user.ID, input)
 	switch {
 	case err != nil: // error internal server
 		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
@@ -127,8 +127,7 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 		GetUser, _ := ah.userService.GetUser(user.ID)
 		message := fmt.Sprintf("%s have requested for WFO", GetUser.Name)
 		ah.logcatService.CreateLogcat(user.ID, message, "attendances")
-		formatter := attendanceResponse.FormatAtt(attCreate)
-		response, _ := json.Marshal(utils.APIResponse("Success Create Attendace Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Create Attendace Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -171,9 +170,9 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attUpdate, err := ah.attService.UpdateAttendance(user.ID, input)
+	_, errUpdate := ah.attService.UpdateAttendance(user.ID, input)
 	switch {
-	case err != nil:
+	case errUpdate != nil:
 		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -183,8 +182,7 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 		userId, employeeName, _ := ah.attService.GetAttendancesById(input.ID)
 		message := fmt.Sprintf("%s have updated request status on %s", CurrentUser.Name, employeeName)
 		ah.logcatService.CreateLogcat(userId, message, "attendances")
-		formatter := attendanceResponse.FormatUpdateAtt(attUpdate)
-		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

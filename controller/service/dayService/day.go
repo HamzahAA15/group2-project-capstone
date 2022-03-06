@@ -40,11 +40,3 @@ func (ds *dayService) UpdateDays(input dayRequest.DayUpdateRequest) (dayEntities
 	updateDay, err := ds.dayRepository.UpdateDay(day)
 	return updateDay, err
 }
-
-func (ds *dayService) CheckUserRole(loginId string) string {
-	currentUser, _ := ds.userRepository.GetUser(loginId)
-	if currentUser.Role != "admin" {
-		return currentUser.Role
-	}
-	return currentUser.Role
-}

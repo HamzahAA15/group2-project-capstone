@@ -54,15 +54,14 @@ func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}
-
 }
 
 func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := middleware.ForContext(ctx).ID
 
-	user, _ := dh.userService.GetUser(userID)
-	if user.Role != "admin" {
+	getUser, _ := dh.userService.GetUser(userID)
+	if getUser.Role != "admin" {
 		response, _ := json.Marshal(utils.APIResponse("You are not admin", http.StatusUnauthorized, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -84,7 +83,7 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dayUpdate, err := dh.dayService.UpdateDays(input)
+	_, err := dh.dayService.UpdateDays(input)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -94,11 +93,10 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 		w.Write(response)
 	default:
 		day, _ := dh.dayService.GetDaysID(input.ID)
-		message := fmt.Sprintf("%s have updated quota on %s to %d", user.Name, day.Date, input.Quota)
+		message := fmt.Sprintf("%s have updated quota on %s to %d", getUser.Name, day.Date, input.Quota)
 		dh.logcatService.CreateLogcat("-", message, "days")
 
-		formatter := dayResponse.FormatUpdateDay(dayUpdate)
-		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
