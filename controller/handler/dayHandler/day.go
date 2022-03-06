@@ -49,15 +49,14 @@ func (dh *dayHandler) GetDaysHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}
-
 }
 
 func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
 
-	checkUserRole := dh.dayService.CheckUserRole(user.ID)
-	if checkUserRole != "admin" {
+	getUser, _ := dh.userService.GetUser(user.ID)
+	if getUser.Role != "admin" {
 		response, _ := json.Marshal(utils.APIResponse("You are not admin", http.StatusUnauthorized, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -79,7 +78,7 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dayUpdate, err := dh.dayService.UpdateDays(input)
+	_, err := dh.dayService.UpdateDays(input)
 	switch {
 	case err != nil:
 		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
@@ -88,8 +87,7 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default:
-		formatter := dayResponse.FormatUpdateDay(dayUpdate)
-		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
