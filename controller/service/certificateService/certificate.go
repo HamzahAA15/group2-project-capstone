@@ -34,13 +34,13 @@ func (cs *certificateService) GetCertificateUser(userID string) ([]certificateEn
 	return certificates, err
 }
 
-func (cs *certificateService) CountVaccineAccept(userID string, dossage int) int {
-	countData := cs.certificateRepository.CountVaccineIsAccept(userID, dossage)
+func (cs *certificateService) CountVaccineIsPending(userID string, dossage int) int {
+	countData := cs.certificateRepository.CountVaccineIsPending(userID, dossage)
 	return countData
 }
 
-func (cs *certificateService) GetVaccineDose(userID string) int {
-	countData := cs.certificateRepository.GetVaccineDose(userID)
+func (cs *certificateService) GetVaccineDose(userID string, status string) int {
+	countData := cs.certificateRepository.GetVaccineDose(userID, status)
 	return countData
 }
 
