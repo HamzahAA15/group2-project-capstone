@@ -25,6 +25,11 @@ func (ds *dayService) GetDays(officeID string, date string) ([]dayEntities.Day, 
 	return days, err
 }
 
+func (ds *dayService) GetDaysID(dayId string) (dayEntities.Day, error) {
+	days, err := ds.dayRepository.GetDayID(dayId)
+	return days, err
+}
+
 func (ds *dayService) UpdateDays(input dayRequest.DayUpdateRequest) (dayEntities.Day, error) {
 	var day dayEntities.Day
 

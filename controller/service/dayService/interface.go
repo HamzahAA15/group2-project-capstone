@@ -7,5 +7,6 @@ import (
 
 type DayServiceInterface interface {
 	GetDays(officeID string, date string) ([]dayEntities.Day, error)
+	GetDaysID(dayId string) (dayEntities.Day, error)
 	UpdateDays(input dayRequest.DayUpdateRequest) (dayEntities.Day, error)
 }
