@@ -43,6 +43,7 @@ func (us *userService) GetUser(id string) (userEntities.User, error) {
 func (us *userService) CreateUser(input userRequest.CreateUserInput) (userEntities.User, error) {
 	user := userEntities.User{}
 	user.ID = uuid.New().String()
+	user.Office.ID = input.OfficeID
 	user.Avatar = fmt.Sprintf("https://ui-avatars.com/api/?name=%s", input.Name)
 	user.Nik = input.Nik
 	user.Email = input.Email

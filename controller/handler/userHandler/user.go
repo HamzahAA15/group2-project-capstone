@@ -99,9 +99,31 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
+
+	getUser, _ := uh.userService.GetUser(user.ID)
+	if getUser.Role != "admin" {
+		response, _ := json.Marshal(utils.APIResponse("You don't have permission to access it", http.StatusUnauthorized, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(response)
+		return
+	}
+
 	var input userRequest.CreateUserInput
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.OfficeID, input.Nik, input.Email, input.Password, input.Name, input.Phone, input.Role)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	userCreate, err := uh.userService.CreateUser(input)
 	switch {
