@@ -40,7 +40,7 @@ func (ah *attHandler) GetAttendancesRangeDate(w http.ResponseWriter, r *http.Req
 	attendances, err := ah.attService.GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order)
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.R
 	attendances, err := ah.attService.GetAttendancesCurrentUser(user.ID, status, order)
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -173,7 +173,7 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 	_, errUpdate := ah.attService.UpdateAttendance(user.ID, input)
 	switch {
 	case errUpdate != nil:
-		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
