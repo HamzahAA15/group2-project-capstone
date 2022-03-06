@@ -1,7 +1,7 @@
 package attendanceRequest
 
 type CreateAttRequest struct {
-	Day string `json:"day" form:"day"`
+	Day string `json:"day_id" form:"day_id"`
 }
 
 type UpdateAttRequest struct {
