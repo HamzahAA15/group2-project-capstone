@@ -2,6 +2,7 @@ package userRequest
 
 type CreateUserInput struct {
 	ID       string `json:"id" form:"id"`
+	OfficeID string `json:"office_id" form:"office_id"`
 	Nik      string `json:"nik" form:"nik"`
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
