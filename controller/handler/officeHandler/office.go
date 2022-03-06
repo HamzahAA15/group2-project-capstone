@@ -22,7 +22,7 @@ func (uh *officeHandler) GetOfficesHandler(w http.ResponseWriter, r *http.Reques
 	offices, err := uh.officeService.GetOffices()
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

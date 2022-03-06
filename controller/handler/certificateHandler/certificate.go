@@ -56,7 +56,7 @@ func (ch *certificateHandler) GetCertificatesHandler(w http.ResponseWriter, r *h
 	certificates, err := ch.certificateService.GetCertificates(orderBy)
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -84,7 +84,7 @@ func (ch *certificateHandler) GetCertificateUserHandler(w http.ResponseWriter, r
 	certificates, err := ch.certificateService.GetCertificateUser(userID)
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -230,7 +230,7 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 		w.WriteHeader(http.StatusNotFound)
 		w.Write(response)
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

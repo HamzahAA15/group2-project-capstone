@@ -13,6 +13,7 @@ import (
 	"sirclo/project-capstone/router/certificateRouter"
 	"sirclo/project-capstone/router/checkInOutRouter"
 	"sirclo/project-capstone/router/dayRouter"
+	"sirclo/project-capstone/router/logcatRouter"
 	"sirclo/project-capstone/router/officeRouter"
 	"sirclo/project-capstone/router/userRouter"
 	"strings"
@@ -39,6 +40,7 @@ func Routes(
 	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo, userRepo, logcatRepo))
 	mount(router, "/attendances", attendanceRouter.AttResource{}.AttRoute(attRepo, userRepo, logcatRepo))
 	mount(router, "/check", checkInOutRouter.CheckInOutResource{}.CheckInOutRoute(checkInOutRepo, userRepo, logcatRepo))
+	mount(router, "/logcats", logcatRouter.LogcatResource{}.LogcatRoute(userRepo, logcatRepo))
 
 	return router
 }
