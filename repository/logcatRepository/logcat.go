@@ -28,3 +28,61 @@ func (lr *logcatRepo) CreateLogcat(lc logcatEntities.Logcat) (logcatEntities.Log
 	}
 	return lc, nil
 }
+
+func (lr *logcatRepo) GetLogcats() ([]logcatEntities.Logcat, error) {
+	var logcats []logcatEntities.Logcat
+
+	result, err := lr.db.Query(`
+	SELECT 
+		id, message, category, created_at 
+	FROM 
+		logcats
+	ORDER BY 
+		created_at DESC`)
+	if err != nil {
+		return logcats, err
+	}
+
+	for result.Next() {
+		var logcat logcatEntities.Logcat
+
+		err = result.Scan(&logcat.ID, &logcat.Message, &logcat.Category, &logcat.CreatedAt)
+		if err != nil {
+			return logcats, err
+		}
+
+		logcats = append(logcats, logcat)
+	}
+
+	return logcats, nil
+}
+
+func (lr *logcatRepo) GetLogcatUser(userID string) ([]logcatEntities.Logcat, error) {
+	var logcats []logcatEntities.Logcat
+
+	result, err := lr.db.Query(`
+	SELECT 
+		id, message, category, created_at 
+	FROM 
+		logcats
+	WHERE
+		user_id = ?
+	ORDER BY 
+		created_at DESC`, userID)
+	if err != nil {
+		return logcats, err
+	}
+
+	for result.Next() {
+		var logcat logcatEntities.Logcat
+
+		err = result.Scan(&logcat.ID, &logcat.Message, &logcat.Category, &logcat.CreatedAt)
+		if err != nil {
+			return logcats, err
+		}
+
+		logcats = append(logcats, logcat)
+	}
+
+	return logcats, nil
+}

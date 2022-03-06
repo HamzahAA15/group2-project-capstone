@@ -27,3 +27,13 @@ func (ls *logcatService) CreateLogcat(loginId, message, category string) (logcat
 	createLogcat, err := ls.lcRepo.CreateLogcat(logcat)
 	return createLogcat, err
 }
+
+func (ls *logcatService) GetLogcats() ([]logcatEntities.Logcat, error) {
+	logcats, err := ls.lcRepo.GetLogcats()
+	return logcats, err
+}
+
+func (ls *logcatService) GetLogcatUser(userID string) ([]logcatEntities.Logcat, error) {
+	logcats, err := ls.lcRepo.GetLogcatUser(userID)
+	return logcats, err
+}
