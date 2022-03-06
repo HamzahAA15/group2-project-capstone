@@ -17,6 +17,16 @@ func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 		db: db,
 	}
 }
+func (ar *attendanceRepo) GetAttendancesById(attID string) (string, string, error) {
+	var userId string
+	var name string
+	query := `SELECT attendances.user_id, users.name FROM attendances LEFT JOIN users ON users.id = attendances.user_id WHERE attendances.id = ?`
+
+	err := ar.db.QueryRow(query, attID).Scan(&userId, &name)
+	fmt.Println(userId, name)
+
+	return userId, name, err
+}
 
 func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance
@@ -107,7 +117,7 @@ func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (a
 		log.Fatal(errNoRows)
 	}
 
-	errDouble := ar.db.QueryRow(`SELECT count(id) as id FROM attendances WHERE days.date = (select days.date from days where days.id = ?) AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
+	errDouble := ar.db.QueryRow(`SELECT count(attendances.id) as id FROM attendances LEFT JOIN days ON days.id = attendances.day_id WHERE days.date = (select days.date from days where days.id = ?) AND user_id = ?`, att.Day.ID, att.Employee.ID).Scan(&checkDouble)
 	if errDouble != nil {
 		log.Fatal(errDouble)
 	}
