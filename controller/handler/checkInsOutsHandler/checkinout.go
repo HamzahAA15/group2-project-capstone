@@ -2,8 +2,11 @@ package checkInsOutsHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/checkInsOutsService"
+	"sirclo/project-capstone/controller/service/logcatService"
+	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils"
 	"sirclo/project-capstone/utils/request/checkInsOutsRequest"
@@ -13,11 +16,15 @@ import (
 
 type checkInOutHandler struct {
 	checkInOutService checkInsOutsService.CheckinoutServiceInterface
+	userService       userService.UserServiceInterface
+	logcatService     logcatService.LogcatServiceInterface
 }
 
-func NewCheckInOutHandler(checkInOutService checkInsOutsService.CheckinoutServiceInterface) CheckInOutHandlerInterface {
+func NewCheckInOutHandler(checkInOutService checkInsOutsService.CheckinoutServiceInterface, userService userService.UserServiceInterface, logcatService logcatService.LogcatServiceInterface) CheckInOutHandlerInterface {
 	return &checkInOutHandler{
 		checkInOutService: checkInOutService,
+		userService:       userService,
+		logcatService:     logcatService,
 	}
 }
 
@@ -101,6 +108,9 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		GetUser, _ := ch.userService.GetUser(userID)
+		message := fmt.Sprintf("%s have check in", GetUser.Name)
+		ch.logcatService.CreateLogcat(userID, message, "checkin")
 		formatter := checkinsoutsResponse.FormatCheckInsOuts(checkIns)
 		response, _ := json.Marshal(utils.APIResponse("Check-Ins Success", http.StatusOK, true, formatter))
 
@@ -136,6 +146,9 @@ func (ch *checkInOutHandler) CheckoutsHandler(w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		GetUser, _ := ch.userService.GetUser(userID)
+		message := fmt.Sprintf("%s have check out", GetUser.Name)
+		ch.logcatService.CreateLogcat(userID, message, "checkout")
 		response, _ := json.Marshal(utils.APIResponse("Check-Outs Success", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
