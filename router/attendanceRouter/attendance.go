@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"sirclo/project-capstone/controller/handler/attendanceHandler"
 	"sirclo/project-capstone/controller/service/attendanceService"
+	"sirclo/project-capstone/controller/service/logcatService"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/repository/attendanceRepository"
+	"sirclo/project-capstone/repository/logcatRepository"
 	"sirclo/project-capstone/repository/userRepository"
 
 	"github.com/gorilla/mux"
@@ -14,10 +16,11 @@ import (
 
 type AttResource struct{}
 
-func (ar AttResource) AttRoute(attRepo attendanceRepository.AttendanceRepoInterface, userRepo userRepository.UserRepoInterface) *mux.Router {
+func (ar AttResource) AttRoute(attRepo attendanceRepository.AttendanceRepoInterface, userRepo userRepository.UserRepoInterface, logcatRepo logcatRepository.LogcatRepoInterface) *mux.Router {
 	attService := attendanceService.NewAttendanceService(attRepo, userRepo)
 	userService := userService.NewUserService(userRepo)
-	attHandler := attendanceHandler.NewAttendanceHandler(attService, userService)
+	logcatService := logcatService.NewLogcatService(logcatRepo)
+	attHandler := attendanceHandler.NewAttendanceHandler(attService, userService, logcatService)
 
 	router := mux.NewRouter()
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(attHandler.GetAttendancesRangeDate))).Methods("GET")
