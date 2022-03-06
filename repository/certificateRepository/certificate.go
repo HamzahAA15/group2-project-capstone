@@ -127,7 +127,7 @@ func (cr *certificateRepo) GetCertificateUser(userID string) ([]certificateEntit
 	return certificates, nil
 }
 
-func (cr *certificateRepo) CountVaccineIsAccept(userID string, dossage int) int {
+func (cr *certificateRepo) CountVaccineIsPending(userID string, dossage int) int {
 	row, err := cr.db.Query(`
 	SELECT
 		COUNT(certificates.user_id)
@@ -159,7 +159,7 @@ func (cr *certificateRepo) CountVaccineIsAccept(userID string, dossage int) int 
 	return count
 }
 
-func (cr *certificateRepo) GetVaccineDose(userID string) int {
+func (cr *certificateRepo) GetVaccineDose(userID string, status string) int {
 	row, err := cr.db.Query(`
 	SELECT
 		COUNT(certificates.user_id)
@@ -168,9 +168,9 @@ func (cr *certificateRepo) GetVaccineDose(userID string) int {
 	WHERE
 			certificates.user_id = ?
 		AND
-			certificates.status = "approved"
+			certificates.status LIKE ?
 	GROUP BY
-		certificates.user_id`, userID)
+		certificates.user_id`, userID, "%"+status+"%")
 
 	if err != nil {
 		log.Fatal(err)
