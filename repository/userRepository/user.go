@@ -50,34 +50,6 @@ func (ur *userRepo) Login(identity string) (userEntities.User, error) {
 	return user, nil
 }
 
-func (ur *userRepo) GetUsers() ([]userEntities.User, error) {
-	var users []userEntities.User
-
-	result, err := ur.db.Query(`
-	SELECT 
-		users.id, offices.name, users.avatar, users.nik, users.email, users.name, users.phone, users.role, users.created_at 
-	FROM 
-		users 
-	JOIN
-		offices ON offices.id = users.office_id	
-	`)
-	if err != nil {
-		return users, err
-	}
-
-	for result.Next() {
-		var user userEntities.User
-
-		err = result.Scan(&user.ID, &user.Office.Name, &user.Avatar, &user.Nik, &user.Email, &user.Name, &user.Phone, &user.Role, &user.CreatedAt)
-		if err != nil {
-			return users, err
-		}
-
-		users = append(users, user)
-	}
-	return users, nil
-}
-
 func (ur *userRepo) GetUser(id string) (userEntities.User, error) {
 	var user userEntities.User
 
@@ -133,27 +105,6 @@ func (ur *userRepo) UpdateUser(user userEntities.User) (userEntities.User, error
 	}
 
 	return user, nil
-}
-
-func (ur *userRepo) DeleteUser(loginId string) error {
-	query := `UPDATE users SET deleted_at = now() WHERE id = ? AND deleted_at IS NULL`
-
-	statement, err := ur.db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	result, errExec := statement.Exec(loginId)
-	if errExec != nil {
-		return errExec
-	}
-
-	affected, _ := result.RowsAffected()
-	if affected == 0 {
-		return fmt.Errorf("user not found")
-	}
-
-	return nil
 }
 
 func (us *userRepo) UploadAvatarUser(user userEntities.User) error {

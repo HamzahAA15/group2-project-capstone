@@ -35,11 +35,6 @@ func (us *userService) LoginUserService(input userRequest.LoginUserInput) (userE
 	return user, err
 }
 
-func (us *userService) GetUsers() ([]userEntities.User, error) {
-	users, err := us.userRepository.GetUsers()
-	return users, err
-}
-
 func (us *userService) GetUser(id string) (userEntities.User, error) {
 	user, err := us.userRepository.GetUser(id)
 	return user, err
@@ -79,11 +74,6 @@ func (us *userService) UpdateUser(id string, input userRequest.UpdateUserInput) 
 
 	updateUser, err := us.userRepository.UpdateUser(user)
 	return updateUser, err
-}
-
-func (us *userService) DeleteUser(loginId string) error {
-	err := us.userRepository.DeleteUser(loginId)
-	return err
 }
 
 func (us *userService) UploadAvatarUser(id string, imageURL string) error {
