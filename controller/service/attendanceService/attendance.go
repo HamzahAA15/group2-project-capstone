@@ -22,6 +22,11 @@ func NewAttendanceService(attRepo attendanceRepository.AttendanceRepoInterface, 
 	}
 }
 
+func (as *attendanceService) GetAttendancesById(attID string) (string, string, error) {
+	userId, employeeName, err := as.attRepo.GetAttendancesById(attID)
+	return userId, employeeName, err
+}
+
 func (as *attendanceService) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
 
 	t := time.Now()
