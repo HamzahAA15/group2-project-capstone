@@ -2,8 +2,10 @@ package attendanceHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/attendanceService"
+	"sirclo/project-capstone/controller/service/logcatService"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils"
@@ -13,14 +15,16 @@ import (
 )
 
 type attHandler struct {
-	attService  attendanceService.AttServiceInterface
-	userService userService.UserServiceInterface
+	attService    attendanceService.AttServiceInterface
+	userService   userService.UserServiceInterface
+	logcatService logcatService.LogcatServiceInterface
 }
 
-func NewAttendanceHandler(attService attendanceService.AttServiceInterface, userService userService.UserServiceInterface) AttHandlerInterface {
+func NewAttendanceHandler(attService attendanceService.AttServiceInterface, userService userService.UserServiceInterface, logcatService logcatService.LogcatServiceInterface) AttHandlerInterface {
 	return &attHandler{
-		attService:  attService,
-		userService: userService,
+		attService:    attService,
+		userService:   userService,
+		logcatService: logcatService,
 	}
 }
 
@@ -120,6 +124,9 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		GetUser, _ := ah.userService.GetUser(user.ID)
+		message := fmt.Sprintf("%s have requested for WFO", GetUser.Name)
+		ah.logcatService.CreateLogcat(user.ID, message, "attendances")
 		formatter := attendanceResponse.FormatAtt(attCreate)
 		response, _ := json.Marshal(utils.APIResponse("Success Create Attendace Data", http.StatusOK, true, formatter))
 
@@ -173,6 +180,9 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default:
+		userId, employeeName, _ := ah.attService.GetAttendancesById(input.ID)
+		message := fmt.Sprintf("%s have updated request status on %s", CurrentUser.Name, employeeName)
+		ah.logcatService.CreateLogcat(userId, message, "attendances")
 		formatter := attendanceResponse.FormatUpdateAtt(attUpdate)
 		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
 
