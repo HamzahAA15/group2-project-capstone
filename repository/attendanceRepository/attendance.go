@@ -17,6 +17,16 @@ func NewMySQLDayRepository(db *sql.DB) AttendanceRepoInterface {
 		db: db,
 	}
 }
+func (ar *attendanceRepo) GetAttendancesById(attID string) (string, string, error) {
+	var userId string
+	var name string
+	query := `SELECT attendances.user_id, users.name FROM attendances LEFT JOIN users ON users.id = attendances.user_id WHERE attendances.id = ?`
+
+	err := ar.db.QueryRow(query, attID).Scan(&userId, &name)
+	fmt.Println(userId, name)
+
+	return userId, name, err
+}
 
 func (ar *attendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
 	var attendances []attendanceEntities.Attendance

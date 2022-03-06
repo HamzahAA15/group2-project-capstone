@@ -148,9 +148,7 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	user := middleware.ForContext(ctx)
 
 	var input userRequest.UpdateUserInput
-
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
 
 	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
 	switch {

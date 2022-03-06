@@ -14,11 +14,6 @@ type DayResponse struct {
 	RemainingQuota int       `json:"remaining_quota"`
 }
 
-type DayUpdateResponse struct {
-	ID    string `json:"id"`
-	Quota int    `json:"quota"`
-}
-
 func FormatDay(day dayEntities.Day) DayResponse {
 	fomatter := DayResponse{
 		ID:             day.ID,
@@ -27,14 +22,6 @@ func FormatDay(day dayEntities.Day) DayResponse {
 		Quota:          day.Quota,
 		TotalApproved:  day.TotalApproved,
 		RemainingQuota: day.RemainingQuota,
-	}
-	return fomatter
-}
-
-func FormatUpdateDay(day dayEntities.Day) DayUpdateResponse {
-	fomatter := DayUpdateResponse{
-		ID:    day.ID,
-		Quota: day.Quota,
 	}
 	return fomatter
 }

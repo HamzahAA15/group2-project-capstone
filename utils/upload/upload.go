@@ -3,7 +3,6 @@ package upload
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -26,7 +25,6 @@ func UploadFile(filename string, path string, s *session.Session, file multipart
 
 	//create a unique file name
 	convName := path + "/" + filename + ".png"
-	fmt.Println("unique file name: ", convName)
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		// result, err := s3.New(s).PutObject(&s3.PutObjectInput{
