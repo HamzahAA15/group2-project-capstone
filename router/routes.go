@@ -33,9 +33,9 @@ func Routes(
 	mount(router, "/users", userRouter.UserResource{}.UserRoute(userRepo))
 	mount(router, "/offices", officeRouter.OfficeResource{}.OfficeRoute(officeRepo))
 	mount(router, "/days", dayRouter.DayResource{}.DayRoute(dayRepo, userRepo, logcatRepo))
-	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo, userRepo))
+	mount(router, "/certificates", certificateRouter.CertificateResource{}.CertificateRoute(certificateRepo, userRepo, logcatRepo))
 	mount(router, "/attendances", attendanceRouter.AttResource{}.AttRoute(attRepo, userRepo, logcatRepo))
-	mount(router, "/check", checkInOutRouter.CheckInOutResource{}.CheckInOutRoute(checkInOutRepo))
+	mount(router, "/check", checkInOutRouter.CheckInOutResource{}.CheckInOutRoute(checkInOutRepo, userRepo, logcatRepo))
 
 	return router
 }

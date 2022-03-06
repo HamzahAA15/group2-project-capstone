@@ -24,10 +24,6 @@ func (dr DayResource) DayRoute(dayRepo dayRepository.DayRepoInterface, userRepo 
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", dayHandler.GetDaysHandler).Methods("GET")
-<<<<<<< HEAD
 	router.Handle("/", middleware.Authentication(http.HandlerFunc(dayHandler.UpdateDaysHandler))).Methods("PUT")
-=======
-	router.Handle("/", middleware.Authentication(http.HandlerFunc(dayHandler.UpdateDaysHandler))).Methods("POST")
->>>>>>> 7b50bc7e692324b69db179a1087fc11f0dee3064
 	return router
 }
