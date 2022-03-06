@@ -57,6 +57,18 @@ func (dr *dayRepo) GetDays(office_id string, date string) ([]dayEntities.Day, er
 	return days, nil
 }
 
+func (dr *dayRepo) GetDayID(dayID string) (dayEntities.Day, error) {
+	var day dayEntities.Day
+
+	row := dr.db.QueryRow(`SELECT date FROM days WHERE id = ?`, dayID)
+
+	err := row.Scan(&day.Date)
+	if err != nil {
+		return day, err
+	}
+	return day, nil
+}
+
 func (dr *dayRepo) UpdateDay(day dayEntities.Day) (dayEntities.Day, error) {
 	query := `UPDATE days SET quota = ?, updated_at = ? WHERE id = ?`
 

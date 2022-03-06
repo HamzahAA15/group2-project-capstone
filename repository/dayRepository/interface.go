@@ -6,5 +6,6 @@ import (
 
 type DayRepoInterface interface {
 	GetDays(office_id string, date string) ([]dayEntities.Day, error)
+	GetDayID(dayID string) (dayEntities.Day, error)
 	UpdateDay(day dayEntities.Day) (dayEntities.Day, error)
 }
