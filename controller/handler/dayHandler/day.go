@@ -2,8 +2,10 @@ package dayHandler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sirclo/project-capstone/controller/service/dayService"
+	"sirclo/project-capstone/controller/service/logcatService"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils"
@@ -13,14 +15,16 @@ import (
 )
 
 type dayHandler struct {
-	dayService  dayService.DayServiceInterface
-	userService userService.UserServiceInterface
+	dayService    dayService.DayServiceInterface
+	userService   userService.UserServiceInterface
+	logcatService logcatService.LogcatServiceInterface
 }
 
-func NewDayHandler(dayService dayService.DayServiceInterface, userService userService.UserServiceInterface) DayHandlerInterface {
+func NewDayHandler(dayService dayService.DayServiceInterface, userService userService.UserServiceInterface, logcatService logcatService.LogcatServiceInterface) DayHandlerInterface {
 	return &dayHandler{
-		dayService:  dayService,
-		userService: userService,
+		dayService:    dayService,
+		userService:   userService,
+		logcatService: logcatService,
 	}
 }
 
@@ -89,6 +93,10 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default:
+		day, _ := dh.dayService.GetDaysID(input.ID)
+		message := fmt.Sprintf("%s have updated quota on %s to %d", user.Name, day.Date, input.Quota)
+		dh.logcatService.CreateLogcat(user.ID, message, "days")
+
 		formatter := dayResponse.FormatUpdateDay(dayUpdate)
 		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
 
