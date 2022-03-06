@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"sirclo/project-capstone/controller/service/certificateService"
+	"sirclo/project-capstone/controller/service/logcatService"
 	"sirclo/project-capstone/controller/service/userService"
 	"sirclo/project-capstone/middleware"
 	"sirclo/project-capstone/utils"
@@ -19,18 +20,19 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/gorilla/mux"
 )
 
 type certificateHandler struct {
 	certificateService certificateService.CertificateServiceInterface
 	userService        userService.UserServiceInterface
+	logcatService      logcatService.LogcatServiceInterface
 }
 
-func NewCertificateHandler(certificateService certificateService.CertificateServiceInterface, userService userService.UserServiceInterface) CertificateHandlerInterface {
+func NewCertificateHandler(certificateService certificateService.CertificateServiceInterface, userService userService.UserServiceInterface, logcatService logcatService.LogcatServiceInterface) CertificateHandlerInterface {
 	return &certificateHandler{
 		certificateService: certificateService,
 		userService:        userService,
+		logcatService:      logcatService,
 	}
 }
 
@@ -146,8 +148,8 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 			return
 		}
 
-		countDosage := ch.certificateService.GetVaccineDose(user.ID) + 1
-		countVaccine := ch.certificateService.CountVaccineAccept(user.ID, countDosage)
+		countDosage := ch.certificateService.GetVaccineDose(user.ID, "approved") + 1
+		countVaccine := ch.certificateService.CountVaccineIsPending(user.ID, countDosage)
 		if countVaccine > 0 {
 			response, _ := json.Marshal(utils.APIResponse("Please wait till your vaccine certificate has been verified by Admin.", http.StatusBadRequest, false, nil))
 
@@ -171,7 +173,9 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 			w.Write(response)
 			return
 		}
-
+		GetUser, _ := ch.userService.GetUser(user.ID)
+		message := fmt.Sprintf("%s have uploaded vaccine certificate", GetUser.Name)
+		ch.logcatService.CreateLogcat(user.ID, message, "certificates")
 		response, _ := json.Marshal(utils.APIResponse("Image uploaded successfully", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -181,8 +185,6 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 }
 
 func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-
 	ctx := r.Context()
 	userID := middleware.ForContext(ctx).ID
 
@@ -199,9 +201,8 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 	var input certificateRequest.CertificateUploadRequest
 	json.NewDecoder(r.Body).Decode(&input)
 
-	dataVaccine, _ := ch.certificateService.GetCertificate(id)
-	countDosage := ch.certificateService.GetVaccineDose(dataVaccine.User.ID)
-	if dataVaccine.Dosage < countDosage || (dataVaccine.Dosage <= countDosage && dataVaccine.Status == "rejected") {
+	dataVaccine, _ := ch.certificateService.GetCertificate(input.ID)
+	if dataVaccine.Status != "pending" {
 		response, _ := json.Marshal(utils.APIResponse("you cannot update this data again", http.StatusBadRequest, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -220,7 +221,7 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 		return
 	}
 
-	_, err := ch.certificateService.VerifyCertificate(id, userID, input)
+	_, err := ch.certificateService.VerifyCertificate(input.ID, userID, input)
 	switch {
 	case err == sql.ErrNoRows: //check data is null?
 		response, _ := json.Marshal(utils.APIResponse("Data Not Found", http.StatusNotFound, false, nil))
@@ -235,6 +236,9 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
+		dataUser, _ := ch.userService.GetUser(dataVaccine.User.ID)
+		message := fmt.Sprintf("%s have verified the vaccine certificate of %s", user.Name, dataUser.Name)
+		ch.logcatService.CreateLogcat(dataUser.ID, message, "certificates")
 		response, _ := json.Marshal(utils.APIResponse("Success Update Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")

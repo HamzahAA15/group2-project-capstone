@@ -70,30 +70,6 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func (uh *userHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	users, err := uh.userService.GetUsers()
-	switch {
-	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-	default: // default response success
-		var data []userResponse.UserFormatter
-		for i := 0; i < len(users); i++ {
-			formatter := userResponse.FormatUser(users[i])
-			data = append(data, formatter)
-		}
-
-		response, _ := json.Marshal(utils.APIResponse("Success Get Users Data", http.StatusOK, true, data))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
-	}
-}
-
 func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := middleware.ForContext(ctx)
@@ -123,9 +99,31 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := middleware.ForContext(ctx)
+
+	getUser, _ := uh.userService.GetUser(user.ID)
+	if getUser.Role != "admin" {
+		response, _ := json.Marshal(utils.APIResponse("You don't have permission to access it", http.StatusUnauthorized, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(response)
+		return
+	}
+
 	var input userRequest.CreateUserInput
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
+
+	errValidation := validation.CheckEmpty(input.OfficeID, input.Nik, input.Email, input.Password, input.Name, input.Phone, input.Role)
+	if errValidation != nil {
+		response, _ := json.Marshal(utils.APIResponse(errValidation.Error(), http.StatusUnprocessableEntity, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write(response)
+		return
+	}
 
 	userCreate, err := uh.userService.CreateUser(input)
 	switch {
@@ -150,9 +148,7 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	user := middleware.ForContext(ctx)
 
 	var input userRequest.UpdateUserInput
-
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&input)
+	json.NewDecoder(r.Body).Decode(&input)
 
 	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
 	switch {
@@ -165,27 +161,6 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	default: // default response success
 		formatter := userResponse.FormatUser(userUpdate)
 		response, _ := json.Marshal(utils.APIResponse("Success Update User Data", http.StatusOK, true, formatter))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
-	}
-}
-
-func (uh *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user := middleware.ForContext(ctx)
-
-	err := uh.userService.DeleteUser(user.ID)
-	switch {
-	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(response)
-	default: // default response success
-		response, _ := json.Marshal(utils.APIResponse("Success Delete User Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

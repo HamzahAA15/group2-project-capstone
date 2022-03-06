@@ -15,20 +15,28 @@ func NewMySQLDayRepository(db *sql.DB) DayRepoInterface {
 	}
 }
 
-func (dr *dayRepo) GetDays(office, time string) ([]dayEntities.Day, error) {
+func (dr *dayRepo) GetDays(office_id string, date string) ([]dayEntities.Day, error) {
 	var days []dayEntities.Day
-	convOffice := "%" + office + "%"
-	convTime := "%" + time + "%"
+	convOffice := "%" + office_id + "%"
+	convTime := "%" + date + "%"
 
 	result, err := dr.db.Query(`
-	Select days.id, offices.name, days.date, days.quota,
-	count(attendances.day_id) AS total_approved, 
-	(days.quota-count(attendances.day_id)) AS remaining_quota 
-	FROM days
-    LEFT JOIN (SELECT attendances.day_id FROM attendances WHERE attendances.status = "approved") attendances ON attendances.day_id = days.id
-    LEFT JOIN offices ON offices.id = days.office_id
-    WHERE offices.id LIKE ? AND days.date LIKE ?
-    GROUP BY days.id ORDER BY days.date ASC`, convOffice, convTime)
+	SELECT days.id, offices.name, days.date, days.quota,
+		COUNT(attendances.day_id) AS total_approved, 
+		(days.quota-count(attendances.day_id)) AS remaining_quota 
+	FROM 
+		days
+    LEFT JOIN 
+		(SELECT 
+				attendances.day_id FROM attendances 
+		WHERE 
+			attendances.status = "approved") attendances ON attendances.day_id = days.id
+    LEFT JOIN 
+		offices ON offices.id = days.office_id
+    WHERE 
+		offices.id LIKE ? AND days.date LIKE ?
+    GROUP BY 
+		days.id ORDER BY days.date ASC`, convOffice, convTime)
 
 	if err != nil {
 		return days, err
@@ -47,8 +55,20 @@ func (dr *dayRepo) GetDays(office, time string) ([]dayEntities.Day, error) {
 	return days, nil
 }
 
+func (dr *dayRepo) GetDayID(dayID string) (dayEntities.Day, error) {
+	var day dayEntities.Day
+
+	row := dr.db.QueryRow(`SELECT date FROM days WHERE id = ?`, dayID)
+
+	err := row.Scan(&day.Date)
+	if err != nil {
+		return day, err
+	}
+	return day, nil
+}
+
 func (dr *dayRepo) UpdateDay(day dayEntities.Day) (dayEntities.Day, error) {
-	query := `UPDATE days SET quota = ?, updated_at = now() WHERE id = ?`
+	query := `UPDATE days SET quota = ?, updated_at = ? WHERE id = ?`
 
 	statement, err := dr.db.Prepare(query)
 	if err != nil {
@@ -57,7 +77,7 @@ func (dr *dayRepo) UpdateDay(day dayEntities.Day) (dayEntities.Day, error) {
 
 	defer statement.Close()
 
-	_, err = statement.Exec(day.Quota, day.ID)
+	_, err = statement.Exec(day.Quota, day.UpdatedAt, day.ID)
 	if err != nil {
 		return day, err
 	}

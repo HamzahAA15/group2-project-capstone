@@ -11,6 +11,7 @@ import (
 	"sirclo/project-capstone/repository/certificateRepository"
 	"sirclo/project-capstone/repository/checkInOutRepository"
 	"sirclo/project-capstone/repository/dayRepository"
+	"sirclo/project-capstone/repository/logcatRepository"
 	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	_routes "sirclo/project-capstone/router"
@@ -34,6 +35,7 @@ func main() {
 	var certificateRepo certificateRepository.CertificateInterface
 	var attRepo attendanceRepository.AttendanceRepoInterface
 	var checkinsRepo checkInOutRepository.CheckInOutRepoInterface
+	var logcatRepo logcatRepository.LogcatRepoInterface
 
 	dbMysql := database.MySQLConnection()
 
@@ -45,6 +47,7 @@ func main() {
 	dayRepo = dayRepository.NewMySQLDayRepository(dbMysql)
 	attRepo = attendanceRepository.NewMySQLDayRepository(dbMysql)
 	checkinsRepo = checkInOutRepository.NewMySQLCheckInOutRepository(dbMysql)
+	logcatRepo = logcatRepository.NewMySQLLogcatRepository(dbMysql)
 
 	router = _routes.Routes(
 		userRepo,
@@ -53,6 +56,7 @@ func main() {
 		dayRepo,
 		attRepo,
 		checkinsRepo,
+		logcatRepo,
 	)
 
 	c := cors.New(cors.Options{
