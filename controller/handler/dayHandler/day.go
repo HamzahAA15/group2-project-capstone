@@ -95,7 +95,7 @@ func (dh *dayHandler) UpdateDaysHandler(w http.ResponseWriter, r *http.Request) 
 	default:
 		day, _ := dh.dayService.GetDaysID(input.ID)
 		message := fmt.Sprintf("%s have updated quota on %s to %d", user.Name, day.Date, input.Quota)
-		dh.logcatService.CreateLogcat(user.ID, message, "days")
+		dh.logcatService.CreateLogcat("-", message, "days")
 
 		formatter := dayResponse.FormatUpdateDay(dayUpdate)
 		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, formatter))
