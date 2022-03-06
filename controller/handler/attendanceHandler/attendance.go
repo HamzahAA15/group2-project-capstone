@@ -126,8 +126,8 @@ func (ah *attHandler) CreateAttendance(w http.ResponseWriter, r *http.Request) {
 	default: // default response success
 		GetUser, _ := ah.userService.GetUser(user.ID)
 		message := fmt.Sprintf("%s have requested for WFO", GetUser.Name)
-		ah.logcatService.CreateLogcat(user.ID, message, "attendances")
-		response, _ := json.Marshal(utils.APIResponse("Success Create Attendace Data", http.StatusOK, true, nil))
+		ah.logcatService.CreateLogcat(user.ID, message, "request")
+		response, _ := json.Marshal(utils.APIResponse("Success Create Request Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -181,8 +181,8 @@ func (ah *attHandler) UpdateAttendance(w http.ResponseWriter, r *http.Request) {
 	default:
 		userId, employeeName, _ := ah.attService.GetAttendancesById(input.ID)
 		message := fmt.Sprintf("%s have updated request status on %s", CurrentUser.Name, employeeName)
-		ah.logcatService.CreateLogcat(userId, message, "attendances")
-		response, _ := json.Marshal(utils.APIResponse("Success Update Day Data", http.StatusOK, true, nil))
+		ah.logcatService.CreateLogcat(userId, message, "request")
+		response, _ := json.Marshal(utils.APIResponse("Success Update Request Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
