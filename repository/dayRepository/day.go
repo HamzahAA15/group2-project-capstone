@@ -21,14 +21,22 @@ func (dr *dayRepo) GetDays(office, time string) ([]dayEntities.Day, error) {
 	convTime := "%" + time + "%"
 
 	result, err := dr.db.Query(`
-	Select days.id, offices.name, days.date, days.quota,
-	count(attendances.day_id) AS total_approved, 
-	(days.quota-count(attendances.day_id)) AS remaining_quota 
-	FROM days
-    LEFT JOIN (SELECT attendances.day_id FROM attendances WHERE attendances.status = "approved") attendances ON attendances.day_id = days.id
-    LEFT JOIN offices ON offices.id = days.office_id
-    WHERE offices.id LIKE ? AND days.date LIKE ?
-    GROUP BY days.id ORDER BY days.date ASC`, convOffice, convTime)
+	SELECT days.id, offices.name, days.date, days.quota,
+		COUNT(attendances.day_id) AS total_approved, 
+		(days.quota-count(attendances.day_id)) AS remaining_quota 
+	FROM 
+		days
+    LEFT JOIN 
+		(SELECT 
+				attendances.day_id FROM attendances 
+		WHERE 
+			attendances.status = "approved") attendances ON attendances.day_id = days.id
+    LEFT JOIN 
+		offices ON offices.id = days.office_id
+    WHERE 
+		offices.id LIKE ? AND days.date LIKE ?
+    GROUP BY 
+		days.id ORDER BY days.date ASC`, convOffice, convTime)
 
 	if err != nil {
 		return days, err
