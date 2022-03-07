@@ -83,7 +83,7 @@ func (uh *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write(response)
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -125,17 +125,16 @@ func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	userCreate, err := uh.userService.CreateUser(input)
+	_, err := uh.userService.CreateUser(input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
-		formatter := userResponse.FormatUser(userCreate)
-		response, _ := json.Marshal(utils.APIResponse("Success Create User Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Create User Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -150,17 +149,16 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	var input userRequest.UpdateUserInput
 	json.NewDecoder(r.Body).Decode(&input)
 
-	userUpdate, err := uh.userService.UpdateUser(user.ID, input)
+	_, err := uh.userService.UpdateUser(user.ID, input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(response)
 	default: // default response success
-		formatter := userResponse.FormatUser(userUpdate)
-		response, _ := json.Marshal(utils.APIResponse("Success Update User Data", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Success Update User Data", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
