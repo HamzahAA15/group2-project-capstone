@@ -22,7 +22,7 @@ func (cr *checkInOutRepo) Gets() ([]checkinEntities.Checkin, error) {
 
 	result, err := cr.db.Query(`
 	SELECT
-		checkins.id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
+		checkins.id, checkins.attendance_id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
 		users.name, users.avatar, users.email,
 		offices.name
 	FROM
@@ -45,7 +45,7 @@ func (cr *checkInOutRepo) Gets() ([]checkinEntities.Checkin, error) {
 		var checkinout checkinEntities.Checkin
 
 		errScan := result.Scan(
-			&checkinout.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
+			&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
 			&checkinout.Attendance.Employee.Name, &checkinout.Attendance.Employee.Avatar, &checkinout.Attendance.Employee.Email,
 			&checkinout.Attendance.Day.OfficeId.Name,
 		)
@@ -65,7 +65,7 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 
 	result, err := cr.db.Query(`
 	SELECT
-		checkins.id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
+		checkins.id, checkins.attendance_id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
 		users.name, users.avatar, users.email,
 		offices.name
 	FROM
@@ -90,7 +90,7 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 		var checkinout checkinEntities.Checkin
 
 		errScan := result.Scan(
-			&checkinout.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
+			&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
 			&checkinout.Attendance.Employee.Name, &checkinout.Attendance.Employee.Avatar, &checkinout.Attendance.Employee.Email,
 			&checkinout.Attendance.Day.OfficeId.Name,
 		)
