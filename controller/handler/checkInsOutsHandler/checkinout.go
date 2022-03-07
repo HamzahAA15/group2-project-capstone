@@ -42,7 +42,7 @@ func (ch *checkInOutHandler) GetsHandler(w http.ResponseWriter, r *http.Request)
 	CheckInsOuts, err := ch.checkInOutService.Gets()
 	switch {
 	case err != nil:
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -100,10 +100,10 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	checkIns, err := ch.checkInOutService.Checkin(input)
+	_, err := ch.checkInOutService.Checkin(input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -112,8 +112,7 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 		GetUser, _ := ch.userService.GetUser(userID)
 		message := fmt.Sprintf("%s have check in", GetUser.Name)
 		ch.logcatService.CreateLogcat(userID, message, "checkin")
-		formatter := checkinsoutsResponse.FormatCheckInsOuts(checkIns)
-		response, _ := json.Marshal(utils.APIResponse("Check-Ins Success", http.StatusOK, true, formatter))
+		response, _ := json.Marshal(utils.APIResponse("Check-Ins Success", http.StatusOK, true, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -141,7 +140,7 @@ func (ch *checkInOutHandler) CheckoutsHandler(w http.ResponseWriter, r *http.Req
 	_, err := ch.checkInOutService.Checkout(userID, input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
