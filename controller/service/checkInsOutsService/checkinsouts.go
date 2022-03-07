@@ -24,6 +24,11 @@ func (cs *checkinoutService) Gets() ([]checkinEntities.Checkin, error) {
 	return checkinsout, err
 }
 
+func (cs *checkinoutService) GetByUser(userID string) ([]checkinEntities.Checkin, error) {
+	checkinsout, err := cs.checkinoutRepository.GetByUser(userID)
+	return checkinsout, err
+}
+
 func (cs *checkinoutService) CheckRequest(attendanceID string) (checkinEntities.Checkin, error) {
 	countData, err := cs.checkinoutRepository.CheckRequest(attendanceID)
 	return countData, err

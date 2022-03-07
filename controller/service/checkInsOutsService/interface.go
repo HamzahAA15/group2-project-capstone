@@ -7,6 +7,7 @@ import (
 
 type CheckinoutServiceInterface interface {
 	Gets() ([]checkinEntities.Checkin, error)
+	GetByUser(userID string) ([]checkinEntities.Checkin, error)
 	CheckRequest(attendanceID string) (checkinEntities.Checkin, error)
 	CheckData(userID string, attendanceID string) int
 	Checkin(input checkInsOutsRequest.CheckInsRequest) (checkinEntities.Checkin, error)
