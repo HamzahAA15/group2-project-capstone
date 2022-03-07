@@ -32,7 +32,7 @@ func Routes(
 ) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://app.swaggerhub.com/apis-docs/justjundana/Capstone/1", http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://app.swaggerhub.com/apis-docs/justjundana/Cofficed/1.2", http.StatusMovedPermanently)
 	})
 	mount(router, "/users", userRouter.UserResource{}.UserRoute(userRepo))
 	mount(router, "/offices", officeRouter.OfficeResource{}.OfficeRoute(officeRepo))
