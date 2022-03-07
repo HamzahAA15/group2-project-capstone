@@ -79,8 +79,9 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	getUser, _ := ch.userService.GetUser(userID)
 	userRequest, _ := ch.checkInOutService.CheckRequest(input.AttendanceID)
-	if userRequest.Attendance.Employee.ID != userID || userRequest.Attendance.Status != "approved" {
+	if (getUser.Role != "admin" && userRequest.Attendance.Employee.ID != userID) || userRequest.Attendance.Status != "approved" {
 		response, _ := json.Marshal(utils.APIResponse("you don't have permission to check-ins in this presence", http.StatusForbidden, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
@@ -112,6 +113,33 @@ func (ch *checkInOutHandler) CheckinsHandler(w http.ResponseWriter, r *http.Requ
 		message := fmt.Sprintf("%s have check in", GetUser.Name)
 		ch.logcatService.CreateLogcat(userID, message, "checkin")
 		response, _ := json.Marshal(utils.APIResponse("Check-Ins Success", http.StatusOK, true, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+}
+
+func (ch *checkInOutHandler) GetsByUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.ForContext(ctx).ID
+
+	CheckInsOuts, err := ch.checkInOutService.GetByUser(userID)
+	switch {
+	case err != nil:
+		response, _ := json.Marshal(utils.APIResponse("Internal Server Error", http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	default:
+		var data []checkinsoutsResponse.CheckInsOutsResponse
+		for _, val := range CheckInsOuts {
+			dayFormatter := checkinsoutsResponse.FormatCheckInsOuts(val)
+			data = append(data, dayFormatter)
+		}
+
+		response, _ := json.Marshal(utils.APIResponse("Success Get Data", http.StatusOK, true, data))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
