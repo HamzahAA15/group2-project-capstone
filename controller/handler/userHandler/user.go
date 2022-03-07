@@ -128,7 +128,7 @@ func (uh *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request)
 	_, err := uh.userService.CreateUser(input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -152,7 +152,7 @@ func (uh *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	_, err := uh.userService.UpdateUser(user.ID, input)
 	switch {
 	case err != nil: // error internal server
-		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
+		response, _ := json.Marshal(utils.APIResponse(err.Error(), http.StatusInternalServerError, false, nil))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
