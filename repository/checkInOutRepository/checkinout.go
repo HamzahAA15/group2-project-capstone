@@ -21,12 +21,22 @@ func (cr *checkInOutRepo) Gets() ([]checkinEntities.Checkin, error) {
 	var checkinsouts []checkinEntities.Checkin
 
 	result, err := cr.db.Query(`
-	SELECT 
-		id, attendance_id, temprature, is_checkins, is_checkouts, created_at, updated_at 
-	FROM 
+	SELECT
+		checkins.id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
+		users.name, users.avatar, users.email,
+		offices.name
+	FROM
 		checkins
-	ORDER BY 
-		created_at DESC`)
+	JOIN 
+		attendances ON attendances.id = checkins.attendance_id
+	JOIN 
+		days ON days.id = attendances.day_id
+	JOIN 
+		users ON users.id = attendances.user_id
+	JOIN 
+		offices ON offices.id = days.office_id
+	ORDER BY
+		checkins.created_at DESC`)
 	if err != nil {
 		return checkinsouts, err
 	}
@@ -34,7 +44,11 @@ func (cr *checkInOutRepo) Gets() ([]checkinEntities.Checkin, error) {
 	for result.Next() {
 		var checkinout checkinEntities.Checkin
 
-		errScan := result.Scan(&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
+		errScan := result.Scan(
+			&checkinout.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
+			&checkinout.Attendance.Employee.Name, &checkinout.Attendance.Employee.Avatar, &checkinout.Attendance.Employee.Email,
+			&checkinout.Attendance.Day.OfficeId.Name,
+		)
 
 		if errScan != nil {
 			return checkinsouts, errScan
@@ -50,16 +64,24 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 	var checkinsouts []checkinEntities.Checkin
 
 	result, err := cr.db.Query(`
-	SELECT 
-		checkins.id, checkins.attendance_id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts,checkins. created_at, checkins.updated_at
-	FROM 
+	SELECT
+		checkins.id, checkins.temprature, checkins.is_checkins, checkins.is_checkouts, checkins.created_at, checkins.updated_at,
+		users.name, users.avatar, users.email,
+		offices.name
+	FROM
 		checkins
-	JOIN
+	JOIN 
 		attendances ON attendances.id = checkins.attendance_id
+	JOIN 
+		days ON days.id = attendances.day_id
+	JOIN 
+		users ON users.id = attendances.user_id
+	JOIN 
+		offices ON offices.id = days.office_id
 	WHERE
 		attendances.user_id = ?
-	ORDER BY 
-		created_at DESC`, userID)
+	ORDER BY
+		checkins.created_at DESC`, userID)
 	if err != nil {
 		return checkinsouts, err
 	}
@@ -67,7 +89,11 @@ func (cr *checkInOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, e
 	for result.Next() {
 		var checkinout checkinEntities.Checkin
 
-		errScan := result.Scan(&checkinout.ID, &checkinout.Attendance.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt)
+		errScan := result.Scan(
+			&checkinout.ID, &checkinout.Temprature, &checkinout.IsCheckIns, &checkinout.IsCheckOuts, &checkinout.CreatedAt, &checkinout.UpdatedAt,
+			&checkinout.Attendance.Employee.Name, &checkinout.Attendance.Employee.Avatar, &checkinout.Attendance.Employee.Email,
+			&checkinout.Attendance.Day.OfficeId.Name,
+		)
 
 		if errScan != nil {
 			return checkinsouts, errScan
