@@ -24,6 +24,28 @@ type AttGetUserResp struct {
 	Total          int              `json:"total"`
 }
 
+type AttIsCheckins struct {
+	ID            string `json:"id"`
+	UserAvatar    string `json:"user_avatar"`
+	UserEmail     string `json:"user_email"`
+	UserName      string `json:"user_name"`
+	OfficeName    string `json:"office_name"`
+	StatusCheckin string `json:"status_checkin"`
+}
+
+func FormatDataIsCheckins(att attendanceEntities.Attendance) AttIsCheckins {
+	fomatter := AttIsCheckins{
+		ID:            att.ID,
+		UserAvatar:    att.Employee.Avatar,
+		UserEmail:     att.Employee.Email,
+		UserName:      att.Employee.Name,
+		OfficeName:    att.Day.OfficeId.Name,
+		StatusCheckin: att.StatusCheckin,
+	}
+
+	return fomatter
+}
+
 func FormatGetAtt(att attendanceEntities.Attendance) AttGetResponse {
 	fomatter := AttGetResponse{
 		ID:       att.ID,

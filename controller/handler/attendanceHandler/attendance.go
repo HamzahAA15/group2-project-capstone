@@ -1,6 +1,7 @@
 package attendanceHandler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -91,6 +92,48 @@ func (ah *attHandler) GetAttendancesCurrentUser(w http.ResponseWriter, r *http.R
 		dataMain.Total = count
 
 		response, _ := json.Marshal(utils.APIResponse("Success Get Attendances Data", http.StatusOK, true, dataMain))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+}
+
+func (ah *attHandler) IsCheckins(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.ForContext(ctx).ID
+
+	user, _ := ah.userService.GetUser(userID)
+	if user.Role != "admin" {
+		response, _ := json.Marshal(utils.APIResponse("You don't have permission to access this data", http.StatusUnauthorized, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(response)
+		return
+	}
+
+	getData, err := ah.attService.IsCheckins()
+	switch {
+	case err == sql.ErrNoRows: //check data is null?
+		response, _ := json.Marshal(utils.APIResponse("Data Not Found", http.StatusNotFound, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(response)
+	case err != nil: // error internal server
+		response, _ := json.Marshal(utils.APIResponse("Something Went Wrong", http.StatusInternalServerError, false, nil))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(response)
+	default: // default response success
+		var data []attendanceResponse.AttIsCheckins
+		for i := 0; i < len(getData); i++ {
+			formatter := attendanceResponse.FormatDataIsCheckins(getData[i])
+			data = append(data, formatter)
+		}
+		response, _ := json.Marshal(utils.APIResponse("Success Get Data", http.StatusOK, true, data))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
