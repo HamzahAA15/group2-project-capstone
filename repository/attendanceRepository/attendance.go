@@ -106,6 +106,66 @@ func (ar *attendanceRepo) GetAttendancesCurrentUser(userId, status, order string
 	return attendances, nil
 }
 
+func (ar *attendanceRepo) IsCheckins() ([]attendanceEntities.Attendance, error) {
+	var attendances []attendanceEntities.Attendance
+
+	result, err := ar.db.Query(`
+	SELECT 
+		attendances.id, users.email, users.name, users.avatar, offices.name, "Checkin" AS is_checkins
+		FROM 
+			attendances
+		LEFT JOIN
+			days ON days.id = attendances.day_id
+		LEFT JOIN
+			offices ON offices.id = days.office_id
+		LEFT JOIN
+			users ON users.id = attendances.user_id
+		WHERE
+			attendances.id IN (
+				SELECT checkins.attendance_id FROM checkins
+			) AND days.date = DATE(NOW())
+		GROUP BY 
+			attendances.id
+	UNION
+	SELECT 
+		attendances.id, users.email, users.name, users.avatar, offices.name, "Not Checkin" AS is_checkins
+		FROM 
+			attendances
+		LEFT JOIN
+			days ON days.id = attendances.day_id
+		LEFT JOIN
+			offices ON offices.id = days.office_id
+		LEFT JOIN
+			users ON users.id = attendances.user_id
+		WHERE
+			attendances.id NOT IN (
+				SELECT checkins.attendance_id FROM checkins
+			) AND days.date = DATE(NOW())
+		GROUP BY 
+			attendances.id;`)
+	if err != nil {
+		return attendances, err
+	}
+
+	for result.Next() {
+		var attendance attendanceEntities.Attendance
+
+		errScan := result.Scan(
+			&attendance.ID,
+			&attendance.Employee.Email, &attendance.Employee.Name, &attendance.Employee.Avatar,
+			&attendance.Day.OfficeId.Name, &attendance.StatusCheckin,
+		)
+
+		if errScan != nil {
+			return attendances, errScan
+		}
+
+		attendances = append(attendances, attendance)
+	}
+
+	return attendances, nil
+}
+
 func (ar *attendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (attendanceEntities.Attendance, error) {
 	var checkDate string
 	var checkDouble int
