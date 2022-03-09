@@ -44,7 +44,7 @@ func (cs *certificateService) GetVaccineDose(userID string, status string) int {
 	return countData
 }
 
-func (cs *certificateService) UploadCertificateVaccine(userID string, input certificateRequest.CertificateUploadRequest) error {
+func (cs *certificateService) UploadCertificateVaccine(userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error) {
 	upload := certificateEntities.Certificate{}
 	upload.ID = uuid.New().String()
 	upload.User.ID = userID
@@ -54,8 +54,8 @@ func (cs *certificateService) UploadCertificateVaccine(userID string, input cert
 	upload.CreatedAt = time.Now()
 	upload.UpdatedAt = time.Now()
 
-	_, err := cs.certificateRepository.UploadCertificateVaccine(upload)
-	return err
+	uploadCertificateVaccine, err := cs.certificateRepository.UploadCertificateVaccine(upload)
+	return uploadCertificateVaccine, err
 }
 
 func (cs *certificateService) VerifyCertificate(id string, userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error) {
