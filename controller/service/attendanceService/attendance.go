@@ -46,6 +46,11 @@ func (as *attendanceService) GetAttendancesCurrentUser(userId, status, order str
 	return attendances, err
 }
 
+func (as *attendanceService) IsCheckins() ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.IsCheckins()
+	return attendances, err
+}
+
 func (as *attendanceService) CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error) {
 	var attendance attendanceEntities.Attendance
 	attendance.ID = uuid.New().String()
@@ -66,12 +71,4 @@ func (as *attendanceService) UpdateAttendance(loginId string, input attendanceRe
 
 	updateAttendance, err := as.attRepo.UpdateAttendance(attendance)
 	return updateAttendance, err
-}
-
-func (as *attendanceService) CheckUserRole(loginId string) string {
-	currentUser, _ := as.userRepo.GetUser(loginId)
-	if currentUser.Role != "admin" {
-		return currentUser.Role
-	}
-	return currentUser.Role
 }

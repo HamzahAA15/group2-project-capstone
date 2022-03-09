@@ -164,7 +164,7 @@ func (ch *certificateHandler) UploadCertificateHandler(w http.ResponseWriter, r 
 			Dosage: countDosage,
 		}
 
-		err_upload := ch.certificateService.UploadCertificateVaccine(user.ID, input)
+		_, err_upload := ch.certificateService.UploadCertificateVaccine(user.ID, input)
 		if err_upload != nil {
 			response, _ := json.Marshal(utils.APIResponse("failed to upload image", http.StatusInternalServerError, false, nil))
 
