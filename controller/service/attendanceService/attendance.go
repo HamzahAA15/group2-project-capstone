@@ -46,6 +46,11 @@ func (as *attendanceService) GetAttendancesCurrentUser(userId, status, order str
 	return attendances, err
 }
 
+func (as *attendanceService) IsCheckins() ([]attendanceEntities.Attendance, error) {
+	attendances, err := as.attRepo.IsCheckins()
+	return attendances, err
+}
+
 func (as *attendanceService) CreateAttendance(loginId string, input attendanceRequest.CreateAttRequest) (attendanceEntities.Attendance, error) {
 	var attendance attendanceEntities.Attendance
 	attendance.ID = uuid.New().String()
