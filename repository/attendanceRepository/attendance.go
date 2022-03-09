@@ -123,7 +123,7 @@ func (ar *attendanceRepo) IsCheckins() ([]attendanceEntities.Attendance, error) 
 		WHERE
 			attendances.id IN (
 				SELECT checkins.attendance_id FROM checkins
-			) AND days.date = DATE(NOW())
+			) AND days.date = DATE(NOW()) AND attendances.status = "approved"
 		GROUP BY 
 			attendances.id
 	UNION
@@ -140,9 +140,9 @@ func (ar *attendanceRepo) IsCheckins() ([]attendanceEntities.Attendance, error) 
 		WHERE
 			attendances.id NOT IN (
 				SELECT checkins.attendance_id FROM checkins
-			) AND days.date = DATE(NOW())
+			) AND days.date = DATE(NOW()) AND attendances.status = "approved"
 		GROUP BY 
-			attendances.id;`)
+			attendances.id`)
 	if err != nil {
 		return attendances, err
 	}
