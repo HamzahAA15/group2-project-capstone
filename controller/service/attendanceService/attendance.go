@@ -72,11 +72,3 @@ func (as *attendanceService) UpdateAttendance(loginId string, input attendanceRe
 	updateAttendance, err := as.attRepo.UpdateAttendance(attendance)
 	return updateAttendance, err
 }
-
-func (as *attendanceService) CheckUserRole(loginId string) string {
-	currentUser, _ := as.userRepo.GetUser(loginId)
-	if currentUser.Role != "admin" {
-		return currentUser.Role
-	}
-	return currentUser.Role
-}
