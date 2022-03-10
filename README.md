@@ -43,7 +43,7 @@
 Cofficed was created for the purpose to prevent and reduce the spread of novel coronavirus covid-19. Built using only the GO standard library, utilize Gorilla Mux at router and RS CORS, with layered architecture approach and isolate the service as a place only for business logic. 
 </p>
 
-[OPEN API](https://app.swaggerhub.com/apis-docs/justjundana/Capstone/1.2)
+[OPEN API](https://app.swaggerhub.com/apis-docs/justjundana/Cofficed/1.2#/)
 
 Find our awesome Front-End repository By Felicia & Lukman below
 </br>
