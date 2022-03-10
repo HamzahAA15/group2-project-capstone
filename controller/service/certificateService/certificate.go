@@ -58,7 +58,7 @@ func (cs *certificateService) UploadCertificateVaccine(userID string, input cert
 	return uploadCertificateVaccine, err
 }
 
-func (cs *certificateService) VerifyCertificate(id string, userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error) {
+func (cs *certificateService) VerifyCertificate(id string, userID string, input certificateRequest.CertificateVerificationRequest) (certificateEntities.Certificate, error) {
 	certificate, errGet := cs.GetCertificate(id)
 	if errGet != nil {
 		return certificateEntities.Certificate{}, errGet
