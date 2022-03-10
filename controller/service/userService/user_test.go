@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestGetUser(t *testing.T) {
@@ -30,22 +31,24 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, "hallo", user.Name, "nama tidak sama")
 }
 
-// func TestLoginUser(t *testing.T) {
-// 	userServiceMock := NewUserService(mockUserRepository{})
-// 	input := userRequest.LoginUserInput{
-// 		Identity: "felicia@sirclo.com",
-// 		Password: "123456789qwerty",
-// 	}
-// 	user, err := userServiceMock.LoginUserService(input)
-// 	// expected := userEntities.User{
-// 	// 	ID:       "1",
-// 	// 	Email:    "felicia@sirclo.com",
-// 	// 	Password: "123456789",
-// 	// 	Role:     "admin",
-// 	// }
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, "1", user.ID)
-// }
+func TestLoginUser(t *testing.T) {
+	userServiceMock := NewUserService(mockUserRepository{})
+	input := userRequest.LoginUserInput{
+		Identity: "felicia@sirclo.com",
+		Password: "123456789",
+	}
+	password := input.Password
+	user, err := userServiceMock.LoginUserService(input)
+	CheckPassword(password, user.Password)
+	expected := userEntities.User{
+		ID:       "1",
+		Email:    "felicia@sirclo.com",
+		Password: "123456789",
+		Role:     "admin",
+	}
+	assert.Nil(t, err)
+	assert.Equal(t, expected, user)
+}
 
 // func TestUpdateUser(id string, input userRequest.UpdateUserInput) (userEntities.User, error) {
 
@@ -76,7 +79,7 @@ func (m mockUserRepository) Login(identity string) (userEntities.User, error) {
 	return userEntities.User{
 		ID:       "1",
 		Email:    "felicia@sirclo.com",
-		Password: "123456789qwerty",
+		Password: "123456789",
 		Role:     "admin",
 	}, nil
 }
@@ -94,4 +97,8 @@ func (m mockUserRepository) UpdateUser(user userEntities.User) (userEntities.Use
 }
 func (m mockUserRepository) UploadAvatarUser(user userEntities.User) error {
 	return nil
+}
+
+func CheckPassword(password string, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
