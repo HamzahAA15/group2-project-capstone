@@ -15,6 +15,7 @@ import (
 	"sirclo/project-capstone/repository/officeRepository"
 	"sirclo/project-capstone/repository/userRepository"
 	_routes "sirclo/project-capstone/router"
+	"sirclo/project-capstone/schedule"
 	"syscall"
 
 	"github.com/gorilla/mux"
@@ -65,6 +66,8 @@ func main() {
 		AllowedHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "Authorization", "X-CSRF-Token", "x-access-token", "Origin", "X-Requested-With"},
 	})
 	http.Handle("/", router)
+
+	go schedule.Schedular()
 
 	errs := make(chan error, 2)
 	go func() {

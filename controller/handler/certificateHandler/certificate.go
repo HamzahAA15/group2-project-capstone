@@ -198,7 +198,7 @@ func (ch *certificateHandler) VerifyCertificateHandler(w http.ResponseWriter, r 
 		return
 	}
 
-	var input certificateRequest.CertificateUploadRequest
+	var input certificateRequest.CertificateVerificationRequest
 	json.NewDecoder(r.Body).Decode(&input)
 
 	dataVaccine, _ := ch.certificateService.GetCertificate(input.ID)
