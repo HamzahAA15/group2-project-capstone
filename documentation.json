@@ -1,0 +1,2374 @@
+{
+  "openapi": "3.0.3",
+  "servers": [
+    {
+      "description": "Cofficed New Normal App Tracker - Dev",
+      "url": "https://lazyevent.site"
+    },
+    {
+      "description": "Virtual API Coffice New Normal App Tracker",
+      "url": "https://virtserver.swaggerhub.com/justjundana/Cofficed/1.2"
+    }
+  ],
+  "info": {
+    "title": "Cofficed New Normal App Tracker",
+    "description": "Create with Love",
+    "contact": {
+      "name": "Cofficed",
+      "url": "https://cofficed.tech"
+    },
+    "termsOfService": "https://lazyevent.site",
+    "version": "1.2"
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "User"
+    },
+    {
+      "name": "Schedule"
+    },
+    {
+      "name": "Office"
+    },
+    {
+      "name": "Certificate Vaccine"
+    },
+    {
+      "name": "Request WFO"
+    },
+    {
+      "name": "Checkins / Checkouts"
+    },
+    {
+      "name": "Log"
+    }
+  ],
+  "paths": {
+    "/users/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login User",
+        "description": "Login User",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestLogin"
+              },
+              "examples": {
+                "Login Admin": {
+                  "description": "Example Login Admin",
+                  "value": {
+                    "identity": "felicia@sirclo.com",
+                    "password": "123456"
+                  }
+                },
+                "Login User": {
+                  "description": "Example Login User",
+                  "value": {
+                    "identity": "jundana@sirclo.com",
+                    "password": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleLoginSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleLoginFailed"
+          }
+        }
+      }
+    },
+    "/users/avatar": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Upload Avatar",
+        "description": "Upload Profile Avatar",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/requestAvatar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Success",
+                    "value": {
+                      "meta": {
+                        "message": "success message",
+                        "code": 200,
+                        "success": true
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 400,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 422,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 500,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get Profile User Data",
+        "description": "Get Profile User Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleUserByIDSuccess"
+          },
+          "404": {
+            "$ref": "#/components/responses/exampleUserByIDFailed"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleUserByIDFailed"
+          }
+        }
+      }
+    },
+    "/users/": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Create New User (Role Admin)",
+        "description": "Create New User (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCreateUser"
+              },
+              "examples": {
+                "register": {
+                  "description": "Example Register User",
+                  "value": {
+                    "office_id": "b4fbfe81-8889-4ea3-98d5-f77736d0aa9e",
+                    "nik": "337412345679",
+                    "email": "dummy@sirclo.com",
+                    "password": "123456",
+                    "name": "Dummy Account",
+                    "phone": "08192837465",
+                    "role": "user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleUserCreateSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleUserCreateFailed"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update User Data",
+        "description": "Update User Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestUpdateUser"
+              },
+              "examples": {
+                "update felicia": {
+                  "description": "Example Update User Felicia",
+                  "value": {
+                    "nik": "3515024687956542",
+                    "email": "felicia@sirclo.com",
+                    "password": "123456",
+                    "name": "Felicia",
+                    "phone": "6289765465335"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleUserUpdateSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleUserUpdateFailed"
+          }
+        }
+      }
+    },
+    "/days/": {
+      "get": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Get Schedules Data",
+        "description": "Get Schedules Data",
+        "parameters": [
+          {
+            "name": "office",
+            "description": "Office ID",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "4569a3c8-5df3-47ba-9a06-f71d13082a78"
+            }
+          },
+          {
+            "name": "date",
+            "description": "Date",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleScheduleGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleScheduleGetFailed"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Update Quota WFO (Role Admin)",
+        "description": "Update Quota WFO (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestUpdateQuota"
+              },
+              "examples": {
+                "update quota": {
+                  "description": "Example Update Quota",
+                  "value": {
+                    "id": "4569a3c8-5df3-47ba-9a06-f71d13082a78",
+                    "quota": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleScheduleUpdateSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleScheduleUpdateFailed"
+          }
+        }
+      }
+    },
+    "/offices/": {
+      "get": {
+        "tags": [
+          "Office"
+        ],
+        "summary": "Get Offices Data",
+        "description": "Get Offices Data",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleOfficeGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleOfficeGetFailed"
+          }
+        }
+      }
+    },
+    "/certificates/": {
+      "get": {
+        "tags": [
+          "Certificate Vaccine"
+        ],
+        "summary": "Get Certificate Data (Role Admin)",
+        "description": "Get Certificate Data (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCertificateGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleCertificateGetFailed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Certificate Vaccine"
+        ],
+        "summary": "Upload Image Certificate",
+        "description": "Upload Image Certificate",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCertificateUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Success",
+                    "value": {
+                      "meta": {
+                        "message": "success message",
+                        "code": 200,
+                        "success": true
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 400,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 422,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Response",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example Response": {
+                    "description": "Response Failed",
+                    "value": {
+                      "meta": {
+                        "message": "failed message",
+                        "code": 500,
+                        "success": false
+                      },
+                      "data": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Certificate Vaccine"
+        ],
+        "summary": "Verify Vaccine Certificate (Role Admin)",
+        "description": "Verify Vaccine Certificate (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCertificateVerify"
+              },
+              "examples": {
+                "attendance": {
+                  "description": "Example Update Certificate",
+                  "value": {
+                    "id": "d6232755-1864-4fd6-bb84-5f136e286f05",
+                    "status": "pending"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateSuccess"
+          },
+          "401": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateFailed"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateFailed"
+          }
+        }
+      }
+    },
+    "/certificates/user": {
+      "get": {
+        "tags": [
+          "Certificate Vaccine"
+        ],
+        "summary": "Get Your Own Certificate Data",
+        "description": "Get Your Own Certificate Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCertificateGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleCertificateGetFailed"
+          }
+        }
+      }
+    },
+    "/attendances/": {
+      "get": {
+        "tags": [
+          "Request WFO"
+        ],
+        "summary": "Get Attendance Data",
+        "description": "Get Attendance DataAttendance",
+        "parameters": [
+          {
+            "name": "office_id",
+            "description": "Office ID",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "4569a3c8-5df3-47ba-9a06-f71d13082a78"
+            }
+          },
+          {
+            "name": "employee_email",
+            "description": "User / Employee Email",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "felicia@sirclo.com"
+            }
+          },
+          {
+            "name": "status",
+            "description": "Status Request WFO",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "approved"
+            }
+          },
+          {
+            "name": "order_by",
+            "description": "Show data Order By Created At",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "DESC"
+            }
+          },
+          {
+            "name": "date_start",
+            "description": "Display Attendance Data Based on the Desired Start Date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2022-01-01"
+            }
+          },
+          {
+            "name": "date_end",
+            "description": "Display Attendance Data Based on the Desired End Date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2023-01-01"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceGetSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceGetFailed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Request WFO"
+        ],
+        "summary": "Create Request WFO",
+        "description": "Create Request WFO",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCreateAttendance"
+              },
+              "examples": {
+                "Request WFO": {
+                  "description": "Example Request WFO",
+                  "value": {
+                    "day_id": "43587460-a2f7-4eb3-aea7-1183b05c2f31"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceCreateSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceCreateFailed"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Request WFO"
+        ],
+        "summary": "Update Attendance Data (Role Admin)",
+        "description": "Update Attendance Data (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestUpdateAttendance"
+              },
+              "examples": {
+                "Change Status WFO": {
+                  "description": "Example Update Attendance",
+                  "value": {
+                    "id": "12345-234567-34567-456789",
+                    "status": "pending",
+                    "notes": "insert note"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateSuccess"
+          },
+          "401": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateFailed"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceUpdateFailed"
+          }
+        }
+      }
+    },
+    "/attendances/user": {
+      "get": {
+        "tags": [
+          "Request WFO"
+        ],
+        "summary": "Get Own Data Request Attendance",
+        "description": "Get Own Data Request Attendance",
+        "parameters": [
+          {
+            "name": "status",
+            "description": "Status Request WFO",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "approved"
+            }
+          },
+          {
+            "name": "order_by",
+            "description": "Show data Order By Created At",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "DESC"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceGetSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceGetFailed"
+          }
+        }
+      }
+    },
+    "/attendances/ischeckin": {
+      "get": {
+        "tags": [
+          "Request WFO"
+        ],
+        "summary": "Get Data is User Already Check-Ins or not (Role Admin)",
+        "description": "Get Data is User Already Check-Ins or not (Role Admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleAttendanceCheckGetSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleAttendanceCheckGetFailed"
+          }
+        }
+      }
+    },
+    "/check/": {
+      "get": {
+        "tags": [
+          "Checkins / Checkouts"
+        ],
+        "summary": "Get All Check-ins / outs Data",
+        "description": "Get All Check-ins / outs Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetFailed"
+          }
+        }
+      }
+    },
+    "/check/user": {
+      "get": {
+        "tags": [
+          "Checkins / Checkouts"
+        ],
+        "summary": "Get Your Own Check-ins / outs Data",
+        "description": "Get Your Own Check-ins / outs Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetFailed"
+          }
+        }
+      }
+    },
+    "/check/ins": {
+      "post": {
+        "tags": [
+          "Checkins / Checkouts"
+        ],
+        "summary": "Check-Ins your attendance",
+        "description": "Check-Ins your attendance",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCheckins"
+              },
+              "examples": {
+                "Check-ins": {
+                  "description": "Example Check-Ins",
+                  "value": {
+                    "attendance_id": "12345-234567-34567-456789",
+                    "temprature": 36.35
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCheckInsSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleCheckInsFailed"
+          }
+        }
+      }
+    },
+    "/check/outs": {
+      "post": {
+        "tags": [
+          "Checkins / Checkouts"
+        ],
+        "summary": "Check-Outs your attendance",
+        "description": "Check-Outs your attendance",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/requestCheckouts"
+              },
+              "examples": {
+                "Check-outs": {
+                  "description": "Example Check-Outs",
+                  "value": {
+                    "id": "987654-76543-765432-54321",
+                    "attendance_id": "12345-234567-34567-456789"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCheckOutsSuccess"
+          },
+          "500": {
+            "$ref": "#/components/responses/exampleCheckOutsFailed"
+          }
+        }
+      }
+    },
+    "/logcats/": {
+      "get": {
+        "tags": [
+          "Log"
+        ],
+        "summary": "Get All Logcats Data",
+        "description": "Get All Logcats Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleCheckInsOutsGetFailed"
+          }
+        }
+      }
+    },
+    "/logcats/user": {
+      "get": {
+        "tags": [
+          "Log"
+        ],
+        "summary": "Get Your Own Logcats Data",
+        "description": "Get Your Own Logcats Data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/exampleLogcatGetSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/exampleLogcatGetFailed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "requestLogin": {
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestAvatar": {
+        "type": "object",
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "requestCreateUser": {
+        "type": "object",
+        "properties": {
+          "office_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestUpdateUser": {
+        "type": "object",
+        "properties": {
+          "nik": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestUpdateQuota": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quota": {
+            "type": "integer",
+            "minLength": 1
+          }
+        }
+      },
+      "requestCertificateUpload": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "requestCertificateVerify": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestCreateAttendance": {
+        "type": "object",
+        "required": [
+          "day"
+        ],
+        "properties": {
+          "day": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestUpdateAttendance": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "requestCheckins": {
+        "type": "object",
+        "properties": {
+          "attendance_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "temprature": {
+            "type": "number",
+            "minLength": 1
+          }
+        }
+      },
+      "requestCheckouts": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attendance_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "responses": {
+      "exampleLoginSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDU2NjEyMDcsImlkIjoiZGQ2Mjk0OWMtOGQwMi00Yzg5LTlhYmItYjAyZmViNDJlZTgyIn0.Rj7faCT3ZujBBv8gusnZZ-05h3K-ZQuaE1wIm9DkVIQ"
+                    },
+                    "Role": {
+                      "type": "string",
+                      "example": "user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleLoginFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserByIDSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "95aec347-e86d-4b69-9129-20f49ad9ceec"
+                    },
+                    "office_name": {
+                      "type": "string",
+                      "example": "Head Office"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "https://cofficed.tech/images/avatar.png"
+                    },
+                    "nik": {
+                      "type": "string",
+                      "example": "337411111120001"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "jundana@sirclo.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jundana Al-Basyir"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "08123456789"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserByIDFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserCreateSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "95aec347-e86d-4b69-9129-20f49ad9ceec"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "https://cofficed.tech"
+                    },
+                    "nik": {
+                      "type": "string",
+                      "example": "337411111120001"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "mail@dummy.dev"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dummy Account"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "08123456789"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserCreateFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserUpdateSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Update User"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "95aec347-e86d-4b69-9129-20f49ad9ceec"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "https://jundana.dev"
+                    },
+                    "nik": {
+                      "type": "string",
+                      "example": "337411111120001"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "mail@jundana.dev"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jundana Al-Basyir"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "08123456789"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserUpdateFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserDeleteSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success to Delete User"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleUserDeleteFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleOfficeGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleOfficeGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleScheduleGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleScheduleGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleScheduleUpdateSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleScheduleUpdateFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCertificateGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCertificateGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceCheckGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceCheckGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceCreateSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Create Attendance"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceCreateFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceUpdateSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleAttendanceUpdateFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckInsOutsGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckInsOutsGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckInsSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckInsFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckOutsSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleCheckOutsFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleLogcatGetSuccess": {
+        "description": "Success Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Success Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "exampleLogcatGetFailed": {
+        "description": "Error Message",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error Message"
+                    },
+                    "code": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "data": {
+                  "type": "string",
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
