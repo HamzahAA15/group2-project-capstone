@@ -4,6 +4,7 @@ import (
 	"sirclo/project-capstone/entities/userEntities"
 )
 
+//go:generate mockgen --destination=./../../mocks/user/repository/mock_repository_user.go -source=interface.go
 type UserRepoInterface interface {
 	CheckEmail(userChecked userEntities.User) (userEntities.User, error)
 	Login(identity string) (userEntities.User, error)

@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/utils/request/userRequest"
 )
 
+//go:generate mockgen --destination=./../../../mocks/user/service/mock_service_user.go -source=interface.go
 type UserServiceInterface interface {
 	LoginUserService(input userRequest.LoginUserInput) (userEntities.User, error)
 	GetUser(id string) (userEntities.User, error)
