@@ -1,41 +1,44 @@
 package officeService
 
 import (
-	"sirclo/project-capstone/entities/officeEntities"
+	"database/sql"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	_officeEntities "sirclo/project-capstone/entities/officeEntities"
+	_mockRepo "sirclo/project-capstone/mocks/office/repository"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 func TestGetOffices(t *testing.T) {
-	officeServiceMock := NewOfficeService(mockOfficeRepo{})
-	offices, err := officeServiceMock.GetOffices()
-	result, _ := []officeEntities.Office{
+	testCases := []struct {
+		name           string
+		mockOfficeRepo func(office *_mockRepo.MockOfficeRepoInterface)
+	}{
 		{
-			ID:   "asdasdas",
-			Name: "asdasdsa",
+			name: "success",
+			mockOfficeRepo: func(office *_mockRepo.MockOfficeRepoInterface) {
+				office.EXPECT().GetOffices().Return([]_officeEntities.Office{}, nil).Times(1)
+			},
 		},
 		{
-			ID:   "lkkhjkhjg",
-			Name: "bmnmb",
+			name: "error",
+			mockOfficeRepo: func(office *_mockRepo.MockOfficeRepoInterface) {
+				office.EXPECT().GetOffices().Return([]_officeEntities.Office{}, sql.ErrConnDone).Times(1)
+			},
 		},
-	}, err
-	assert.Nil(t, err)
-	assert.Equal(t, result, offices)
-}
+	}
 
-type mockOfficeRepo struct {
-}
+	for i := range testCases {
+		tc := testCases[i]
 
-func (m mockOfficeRepo) GetOffices() ([]officeEntities.Office, error) {
-	return []officeEntities.Office{
-		{
-			ID:   "asdasdas",
-			Name: "asdasdsa",
-		},
-		{
-			ID:   "lkkhjkhjg",
-			Name: "bmnmb",
-		},
-	}, nil
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockRepo.NewMockOfficeRepoInterface(ctrl)
+			tc.mockOfficeRepo(mockRepo)
+
+			s := NewOfficeService(mockRepo)
+			_, _ = s.GetOffices()
+		})
+	}
 }
