@@ -11,6 +11,6 @@ type CertificateServiceInterface interface {
 	GetCertificateUser(userId string) ([]certificateEntities.Certificate, error)
 	CountVaccineIsPending(userID string, dossage int) int
 	GetVaccineDose(userID string, status string) int
-	UploadCertificateVaccine(userID string, input certificateRequest.CertificateUploadRequest) error
-	VerifyCertificate(id string, userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error)
+	UploadCertificateVaccine(userID string, input certificateRequest.CertificateUploadRequest) (certificateEntities.Certificate, error)
+	VerifyCertificate(id string, userID string, input certificateRequest.CertificateVerificationRequest) (certificateEntities.Certificate, error)
 }
