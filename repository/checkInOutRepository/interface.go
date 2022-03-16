@@ -2,6 +2,7 @@ package checkInOutRepository
 
 import "sirclo/project-capstone/entities/checkinEntities"
 
+//go:generate mockgen --destination=./../../mocks/checkinout/repository/mock_repository_checkinout.go -source=interface.go
 type CheckInOutRepoInterface interface {
 	Gets() ([]checkinEntities.Checkin, error)
 	GetByUser(userID string) ([]checkinEntities.Checkin, error)
