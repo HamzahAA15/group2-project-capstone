@@ -1,89 +1,157 @@
 package logcatService
 
 import (
-	"sirclo/project-capstone/entities/logcatEntities"
+	"errors"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/assert"
+	_logcatEntities "sirclo/project-capstone/entities/logcatEntities"
+	_mockRepo "sirclo/project-capstone/mocks/logcat/repository"
+	_utils "sirclo/project-capstone/utils"
+
+	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 func TestCreateLogcat(t *testing.T) {
-	logcatServiceMock := NewLogcatService(mockLogcatRepository{})
-	logcat, err := logcatServiceMock.CreateLogcat("logcat-123456789", "logcat-message", "user")
-	assert.Nil(t, err)
-	assert.Equal(t, "logcat-123456789", logcat.ID, "tidak sama")
-	assert.Equal(t, "message-logcat-123456789", logcat.Message, "tidak sama")
+	logcatData := randomLogcat(t)
+
+	testCases := []struct {
+		name           string
+		body           _logcatEntities.Logcat
+		mockLogcatRepo func(logcat *_mockRepo.MockLogcatRepoInterface)
+	}{
+		{
+			name: "success",
+			body: _logcatEntities.Logcat{
+				ID:       logcatData.ID,
+				Message:  logcatData.Message,
+				Category: logcatData.Category,
+			},
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().CreateLogcat(gomock.Any()).Return(logcatData, nil).Times(1)
+			},
+		},
+		{
+			name: "error",
+			body: _logcatEntities.Logcat{
+				ID:       logcatData.ID,
+				Message:  logcatData.Message,
+				Category: logcatData.Category,
+			},
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().CreateLogcat(gomock.Any()).Return(logcatData, errors.New("error")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockRepo.NewMockLogcatRepoInterface(ctrl)
+			tc.mockLogcatRepo(mockRepo)
+
+			s := NewLogcatService(mockRepo)
+			_, _ = s.CreateLogcat(tc.body.ID, tc.body.Message, tc.body.Category)
+		})
+	}
 }
 
 func TestGetLogcats(t *testing.T) {
-	logcatServiceMock := NewLogcatService(mockLogcatRepository{})
-	logcat, err := logcatServiceMock.GetLogcats()
+	logcatData := randomLogcats(t)
 
-	expected, _ := []logcatEntities.Logcat{
+	testCases := []struct {
+		name           string
+		mockLogcatRepo func(logcat *_mockRepo.MockLogcatRepoInterface)
+	}{
 		{
-			ID:      "logcat-123456789",
-			Message: "message-logcat-123456789",
+			name: "success",
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().GetLogcats().Return(logcatData, nil).Times(1)
+			},
 		},
 		{
-			ID:      "logcat-987654321",
-			Message: "message-logcat-987654321",
+			name: "error",
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().GetLogcats().Return(logcatData, errors.New("error")).Times(1)
+			},
 		},
-	}, err
+	}
 
-	assert.Nil(t, err)
-	assert.Equal(t, expected, logcat)
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockRepo.NewMockLogcatRepoInterface(ctrl)
+			tc.mockLogcatRepo(mockRepo)
+
+			s := NewLogcatService(mockRepo)
+			_, _ = s.GetLogcats()
+		})
+	}
 }
 
 func TestGetLogcatUser(t *testing.T) {
-	logcatServiceMock := NewLogcatService(mockLogcatRepository{})
-	logcat, err := logcatServiceMock.GetLogcatUser("user-for-testing")
+	logcatData := randomLogcats(t)
 
-	expected, _ := []logcatEntities.Logcat{
+	testCases := []struct {
+		name           string
+		idUser         string
+		mockLogcatRepo func(logcat *_mockRepo.MockLogcatRepoInterface)
+	}{
 		{
-			ID:      "logcat-123456789",
-			Message: "message-logcat-123456789",
+			name:   "success",
+			idUser: "1",
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().GetLogcatUser(gomock.Eq("1")).Return(logcatData, nil).Times(1)
+			},
 		},
 		{
-			ID:      "logcat-987654321",
-			Message: "message-logcat-987654321",
+			name:   "error",
+			idUser: "2",
+			mockLogcatRepo: func(logcat *_mockRepo.MockLogcatRepoInterface) {
+				logcat.EXPECT().GetLogcatUser(gomock.Eq("2")).Return(logcatData, errors.New("error")).Times(1)
+			},
 		},
-	}, err
+	}
 
-	assert.Nil(t, err)
-	assert.Equal(t, expected, logcat)
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockRepo.NewMockLogcatRepoInterface(ctrl)
+			tc.mockLogcatRepo(mockRepo)
+
+			s := NewLogcatService(mockRepo)
+			_, _ = s.GetLogcatUser(tc.idUser)
+		})
+	}
 }
 
-type mockLogcatRepository struct{}
+func randomLogcat(t *testing.T) (logcat _logcatEntities.Logcat) {
+	logcat = _logcatEntities.Logcat{
+		ID:        uuid.New().String(),
+		Message:   _utils.RandomString(20),
+		Category:  "logcat",
+		UpdatedAt: time.Now(),
+	}
 
-func (mock mockLogcatRepository) CreateLogcat(lc logcatEntities.Logcat) (logcatEntities.Logcat, error) {
-	return logcatEntities.Logcat{
-		ID:      "logcat-123456789",
-		Message: "message-logcat-123456789",
-	}, nil
+	return
 }
 
-func (mock mockLogcatRepository) GetLogcats() ([]logcatEntities.Logcat, error) {
-	return []logcatEntities.Logcat{
+func randomLogcats(t *testing.T) (logcat []_logcatEntities.Logcat) {
+	logcat = []_logcatEntities.Logcat{
 		{
-			ID:      "logcat-123456789",
-			Message: "message-logcat-123456789",
+			ID:        uuid.New().String(),
+			Message:   _utils.RandomString(20),
+			Category:  "logcat",
+			UpdatedAt: time.Now(),
 		},
-		{
-			ID:      "logcat-987654321",
-			Message: "message-logcat-987654321",
-		},
-	}, nil
-}
+	}
 
-func (mock mockLogcatRepository) GetLogcatUser(userID string) ([]logcatEntities.Logcat, error) {
-	return []logcatEntities.Logcat{
-		{
-			ID:      "logcat-123456789",
-			Message: "message-logcat-123456789",
-		},
-		{
-			ID:      "logcat-987654321",
-			Message: "message-logcat-987654321",
-		},
-	}, nil
+	return
 }
