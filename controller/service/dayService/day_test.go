@@ -2,140 +2,157 @@ package dayService
 
 import (
 	"errors"
-	"sirclo/project-capstone/entities/dayEntities"
-	"sirclo/project-capstone/entities/officeEntities"
-	"sirclo/project-capstone/entities/userEntities"
-	"sirclo/project-capstone/utils/request/dayRequest"
 	"testing"
-	"time"
 
-	"github.com/stretchr/testify/assert"
+	_dayEntities "sirclo/project-capstone/entities/dayEntities"
+	_mockDayRepo "sirclo/project-capstone/mocks/day/repository"
+	_mockUserRepo "sirclo/project-capstone/mocks/user/repository"
+	_dayRequest "sirclo/project-capstone/utils/request/dayRequest"
+
+	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 func TestGetDays(t *testing.T) {
-	dayServiceMock := NewDayService(mockDaysRepo{}, mockUserRepository{})
-	day, err := dayServiceMock.GetDays("1", "2022-02-21")
-	expected := []dayEntities.Day{
+	daysData := dummyDays(t)
+
+	testCases := []struct {
+		name     string
+		idOffice string
+		date     string
+		mockRepo func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
 		{
-			ID:             "qweqw",
-			OfficeId:       officeEntities.Office{Name: "Head Office"},
-			Date:           time.Date(time.Now().Year(), 2, 1, 0, 0, 0, 0, time.Local),
-			Quota:          100,
-			TotalApproved:  9,
-			RemainingQuota: 91,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
+			name:     "success",
+			idOffice: "1",
+			date:     "2001-01-01",
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().GetDays(gomock.Eq("1"), gomock.Eq("2001-01-01")).Return(daysData, nil).Times(1)
+			},
+		},
+		{
+			name:     "error",
+			idOffice: "2",
+			date:     "2002-02-02",
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().GetDays(gomock.Eq("2"), gomock.Eq("2002-02-02")).Return(daysData, errors.New("error")).Times(1)
+			},
 		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, day)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockDayRepo := _mockDayRepo.NewMockDayRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockDayRepo, mockUserRepo)
+
+			s := NewDayService(mockDayRepo, mockUserRepo)
+			_, _ = s.GetDays(tc.idOffice, tc.date)
+		})
+	}
 }
 
-func TestGetDayId(t *testing.T) {
-	dayServiceMock := NewDayService(mockDaysRepo{}, mockUserRepository{})
-	day, err := dayServiceMock.GetDaysID("1")
-	expected := dayEntities.Day{
-		ID:             "1",
-		OfficeId:       officeEntities.Office{Name: "Head Office"},
-		Date:           time.Date(time.Now().Year(), 2, 1, 0, 0, 0, 0, time.Local),
-		Quota:          100,
-		TotalApproved:  9,
-		RemainingQuota: 91,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, day)
-}
+func TestGetDaysID(t *testing.T) {
+	dayData := dummyDay(t)
 
-func TestUpdateDay(t *testing.T) {
-	dayServiceMock := NewDayService(mockDaysRepo{}, mockUserRepository{})
-	input := dayRequest.DayUpdateRequest{
-		ID:    "1",
-		Quota: 80,
-	}
-	day, err := dayServiceMock.UpdateDays(input)
-	expected := dayEntities.Day{
-		ID:        "1",
-		Quota:     80,
-		UpdatedAt: time.Now(),
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, day)
-}
-
-type mockDaysRepo struct{}
-
-func (m mockDaysRepo) GetDays(office_id string, date string) ([]dayEntities.Day, error) {
-	return []dayEntities.Day{
+	testCases := []struct {
+		name     string
+		idDay    string
+		mockRepo func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
 		{
-			ID:             "qweqw",
-			OfficeId:       officeEntities.Office{Name: "Head Office"},
-			Date:           time.Date(time.Now().Year(), 2, 1, 0, 0, 0, 0, time.Local),
-			Quota:          100,
-			TotalApproved:  9,
-			RemainingQuota: 91,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
+			name:  "success",
+			idDay: "1",
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().GetDayID(gomock.Eq("1")).Return(dayData, nil).Times(1)
+			},
 		},
-	}, nil
-}
-
-func (m mockDaysRepo) GetDayID(dayID string) (dayEntities.Day, error) {
-	return dayEntities.Day{
-		ID:             dayID,
-		OfficeId:       officeEntities.Office{Name: "Head Office"},
-		Date:           time.Date(time.Now().Year(), 2, 1, 0, 0, 0, 0, time.Local),
-		Quota:          100,
-		TotalApproved:  9,
-		RemainingQuota: 91,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}, nil
-}
-
-func (m mockDaysRepo) UpdateDay(day dayEntities.Day) (dayEntities.Day, error) {
-	return dayEntities.Day{
-		ID:        "1",
-		Quota:     80,
-		UpdatedAt: time.Now(),
-	}, nil
-}
-
-type mockUserRepository struct{}
-
-func (m mockUserRepository) GetUser(id string) (userEntities.User, error) {
-	var gagal userEntities.User
-	if id == "2" {
-		return gagal, errors.New("error")
+		{
+			name:  "error",
+			idDay: "2",
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().GetDayID(gomock.Eq("2")).Return(dayData, errors.New("error")).Times(1)
+			},
+		},
 	}
 
-	return userEntities.User{
-		ID:    "1",
-		Name:  "hallo",
-		Email: "mail@test.com",
-	}, nil
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockDayRepo := _mockDayRepo.NewMockDayRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockDayRepo, mockUserRepo)
+
+			s := NewDayService(mockDayRepo, mockUserRepo)
+			_, _ = s.GetDaysID(tc.idDay)
+		})
+	}
 }
 
-func (m mockUserRepository) CheckEmail(userChecked userEntities.User) (userEntities.User, error) {
-	return userEntities.User{}, nil
+func TestUpdateDays(t *testing.T) {
+	testCases := []struct {
+		name     string
+		body     _dayRequest.DayUpdateRequest
+		mockRepo func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
+		{
+			name: "success",
+			body: _dayRequest.DayUpdateRequest{
+				ID:    uuid.New().String(),
+				Quota: 50,
+			},
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().UpdateDay(gomock.Any()).Return(_dayEntities.Day{}, nil).Times(1)
+			},
+		},
+		{
+			name: "error",
+			body: _dayRequest.DayUpdateRequest{
+				ID:    uuid.New().String(),
+				Quota: 100,
+			},
+			mockRepo: func(day *_mockDayRepo.MockDayRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				day.EXPECT().UpdateDay(gomock.Any()).Return(_dayEntities.Day{}, errors.New("error")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockDayRepo := _mockDayRepo.NewMockDayRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockDayRepo, mockUserRepo)
+
+			s := NewDayService(mockDayRepo, mockUserRepo)
+			_, _ = s.UpdateDays(tc.body)
+		})
+	}
 }
 
-func (m mockUserRepository) Login(identity string) (userEntities.User, error) {
-	return userEntities.User{}, nil
+func dummyDays(t *testing.T) (days []_dayEntities.Day) {
+	days = []_dayEntities.Day{
+		{
+			ID:    uuid.New().String(),
+			Quota: 50,
+		},
+	}
+
+	return
 }
 
-func (m mockUserRepository) CreateUser(user userEntities.User) (userEntities.User, error) {
-	return userEntities.User{
-		ID:    "1",
-		Name:  "hallo",
-		Email: "mail@test.com",
-	}, nil
-}
-func (m mockUserRepository) UpdateUser(user userEntities.User) (userEntities.User, error) {
-	return userEntities.User{}, nil
+func dummyDay(t *testing.T) (day _dayEntities.Day) {
+	day = _dayEntities.Day{
+		ID:    uuid.New().String(),
+		Quota: 50,
+	}
 
-}
-func (m mockUserRepository) UploadAvatarUser(user userEntities.User) error {
-	return nil
+	return
 }
