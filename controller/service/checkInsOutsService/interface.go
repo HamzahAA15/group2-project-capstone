@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/utils/request/checkInsOutsRequest"
 )
 
+//go:generate mockgen --destination=./../../../mocks/checkinout/service/mock_service_checkinout.go -source=interface.go
 type CheckinoutServiceInterface interface {
 	Gets() ([]checkinEntities.Checkin, error)
 	GetByUser(userID string) ([]checkinEntities.Checkin, error)
