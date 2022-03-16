@@ -1,195 +1,294 @@
 package checkInsOutsService
 
 import (
-	"sirclo/project-capstone/entities/attendanceEntities"
-	"sirclo/project-capstone/entities/checkinEntities"
-	"sirclo/project-capstone/entities/userEntities"
-	"sirclo/project-capstone/utils/request/checkInsOutsRequest"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	_attendanceEntities "sirclo/project-capstone/entities/attendanceEntities"
+	_checkinsoutsEntities "sirclo/project-capstone/entities/checkinEntities"
+	_mockCheckinsoutsRepo "sirclo/project-capstone/mocks/checkinout/repository"
+	_utils "sirclo/project-capstone/utils"
+	_checkInsOutsRequest "sirclo/project-capstone/utils/request/checkInsOutsRequest"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 func TestGets(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	cek, err := cekServiceMock.Gets()
-	expected := []checkinEntities.Checkin{
+	checkinsoutsData := dummyCheckinsouts(t)
+
+	testCases := []struct {
+		name                 string
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
 		{
-			ID:         "1",
-			Attendance: attendanceEntities.Attendance{ID: "1"},
-			Temprature: 35.7,
-			IsCheckIns: true,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			name: "success",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().Gets().Return(checkinsoutsData, nil).Times(1)
+			},
 		},
 		{
-			ID:         "2",
-			Attendance: attendanceEntities.Attendance{ID: "2"},
-			Temprature: 36.7,
-			IsCheckIns: false,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			name: "error",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().Gets().Return(checkinsoutsData, errors.New("error")).Times(1)
+			},
 		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cek)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_, _ = s.Gets()
+		})
+	}
 }
 
 func TestGetByUser(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	cek, err := cekServiceMock.GetByUser("3")
-	expected := []checkinEntities.Checkin{
+	checkinsoutsData := dummyCheckinsouts(t)
+
+	testCases := []struct {
+		name                 string
+		idUser               string
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
 		{
-			ID:         "1",
-			Attendance: attendanceEntities.Attendance{ID: "1", Employee: userEntities.User{ID: "3"}},
-			Temprature: 35.5,
-			IsCheckIns: true,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			name:   "success",
+			idUser: "1",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().GetByUser(gomock.Eq("1")).Return(checkinsoutsData, nil).Times(1)
+			},
 		},
 		{
-			ID:         "2",
-			Attendance: attendanceEntities.Attendance{ID: "2", Employee: userEntities.User{ID: "3"}},
-			Temprature: 36.4,
-			IsCheckIns: false,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			name:   "error",
+			idUser: "2",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().GetByUser(gomock.Eq("2")).Return(checkinsoutsData, errors.New("error")).Times(1)
+			},
 		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cek)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_, _ = s.GetByUser(tc.idUser)
+		})
+	}
 }
 
 func TestCheckRequest(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	cek, err := cekServiceMock.CheckRequest("7")
-	expected := checkinEntities.Checkin{
-		ID:         "1",
-		Attendance: attendanceEntities.Attendance{ID: "7", Employee: userEntities.User{ID: "3"}, Status: "approved"},
+	checkinoutData := dummyCheckinout(t)
+
+	testCases := []struct {
+		name                 string
+		idAttendance         string
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
+		{
+			name:         "success",
+			idAttendance: "1",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckRequest(gomock.Eq("1")).Return(checkinoutData, nil).Times(1)
+			},
+		},
+		{
+			name:         "error",
+			idAttendance: "2",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckRequest(gomock.Eq("2")).Return(checkinoutData, errors.New("error")).Times(1)
+			},
+		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cek)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_, _ = s.CheckRequest(tc.idAttendance)
+		})
+	}
 }
 
 func TestCheckData(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	cek := cekServiceMock.CheckData("3", "2")
-	assert.Equal(t, 1, cek)
+	testCases := []struct {
+		name                 string
+		idUser               string
+		idAttendance         string
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
+		{
+			name:         "success",
+			idUser:       "1",
+			idAttendance: "1",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckData(gomock.Eq("1"), gomock.Eq("1")).Return(1).Times(1)
+			},
+		},
+		{
+			name:         "error",
+			idUser:       "2",
+			idAttendance: "2",
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckData(gomock.Eq("2"), gomock.Eq("2")).Return(0).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_ = s.CheckData(tc.idUser, tc.idAttendance)
+		})
+	}
 }
 
 func TestCheckIn(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	input := checkInsOutsRequest.CheckInsRequest{
-		ID:           "1",
-		AttendanceID: "2",
-		Temprature:   35.2,
-		IsCheckIns:   true,
-		IsCheckOuts:  false,
+	checkinoutData := dummyCheckinout(t)
+
+	testCases := []struct {
+		name                 string
+		body                 _checkInsOutsRequest.CheckInsRequest
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
+		{
+			name: "success",
+			body: _checkInsOutsRequest.CheckInsRequest{
+				ID:          _utils.RandomString(8),
+				Temprature:  35.0,
+				IsCheckIns:  true,
+				IsCheckOuts: false,
+			},
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckIn(gomock.Any()).Return(checkinoutData, nil).Times(1)
+			},
+		},
+		{
+			name: "error",
+			body: _checkInsOutsRequest.CheckInsRequest{
+				ID:          _utils.RandomString(8),
+				Temprature:  35.0,
+				IsCheckIns:  true,
+				IsCheckOuts: false,
+			},
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckIn(gomock.Any()).Return(checkinoutData, errors.New("error")).Times(1)
+			},
+		},
 	}
-	cek, err := cekServiceMock.Checkin(input)
-	expected := checkinEntities.Checkin{
-		ID:         "1",
-		Attendance: attendanceEntities.Attendance{ID: "2"}, Temprature: 35.2,
-		IsCheckIns:  true,
-		IsCheckOuts: false,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_, _ = s.Checkin(tc.body)
+		})
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cek)
 }
 
 func TestCheckOut(t *testing.T) {
-	cekServiceMock := NewCheckInOutService(mockCheckInsOutRepo{})
-	input := checkInsOutsRequest.CheckOutsRequest{
-		ID:           "1",
-		AttendanceID: "2",
-		IsCheckOuts:  false,
+	checkinoutData := dummyCheckinout(t)
+
+	testCases := []struct {
+		name                 string
+		idUser               string
+		body                 _checkInsOutsRequest.CheckOutsRequest
+		mockCheckinsoutsRepo func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface)
+	}{
+		{
+			name:   "success",
+			idUser: "1",
+			body: _checkInsOutsRequest.CheckOutsRequest{
+				ID:           _utils.RandomString(8),
+				AttendanceID: _utils.RandomString(8),
+				IsCheckOuts:  true,
+			},
+
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckOut(gomock.Eq("1"), gomock.Any()).Return(checkinoutData, nil).Times(1)
+			},
+		},
+		{
+			name:   "error",
+			idUser: "2",
+			body: _checkInsOutsRequest.CheckOutsRequest{
+				ID:           _utils.RandomString(8),
+				AttendanceID: _utils.RandomString(8),
+				IsCheckOuts:  true,
+			},
+
+			mockCheckinsoutsRepo: func(checkinsouts *_mockCheckinsoutsRepo.MockCheckInOutRepoInterface) {
+				checkinsouts.EXPECT().CheckOut(gomock.Eq("2"), gomock.Any()).Return(checkinoutData, errors.New("error")).Times(1)
+			},
+		},
 	}
-	cek, err := cekServiceMock.Checkout("3", input)
-	expected := checkinEntities.Checkin{
-		ID:          "1",
-		Attendance:  attendanceEntities.Attendance{ID: "2", Employee: userEntities.User{ID: "3"}},
-		IsCheckOuts: true,
-		UpdatedAt:   time.Now(),
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCheckinsoutsRepo.NewMockCheckInOutRepoInterface(ctrl)
+			tc.mockCheckinsoutsRepo(mockRepo)
+
+			s := NewCheckInOutService(mockRepo)
+			_, _ = s.Checkout(tc.idUser, tc.body)
+		})
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cek)
 }
 
-type mockCheckInsOutRepo struct{}
-
-func (m mockCheckInsOutRepo) Gets() ([]checkinEntities.Checkin, error) {
-	return []checkinEntities.Checkin{
+func dummyCheckinsouts(t *testing.T) (checkinsouts []_checkinsoutsEntities.Checkin) {
+	checkinsouts = []_checkinsoutsEntities.Checkin{
 		{
-			ID:         "1",
-			Attendance: attendanceEntities.Attendance{ID: "1"},
-			Temprature: 35.7,
-			IsCheckIns: true,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			ID:          _utils.RandomString(8),
+			Attendance:  _attendanceEntities.Attendance{ID: _utils.RandomString(8)},
+			Temprature:  35.7,
+			IsCheckIns:  true,
+			IsCheckOuts: false,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		},
-		{
-			ID:         "2",
-			Attendance: attendanceEntities.Attendance{ID: "2"},
-			Temprature: 36.7,
-			IsCheckIns: false,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-		},
-	}, nil
+	}
+
+	return
 }
 
-func (m mockCheckInsOutRepo) GetByUser(userID string) ([]checkinEntities.Checkin, error) {
-	return []checkinEntities.Checkin{
-		{
-			ID:         "1",
-			Attendance: attendanceEntities.Attendance{ID: "1", Employee: userEntities.User{ID: userID}},
-			Temprature: 35.5,
-			IsCheckIns: true,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-		},
-		{
-			ID:         "2",
-			Attendance: attendanceEntities.Attendance{ID: "2", Employee: userEntities.User{ID: userID}},
-			Temprature: 36.4,
-			IsCheckIns: false,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-		},
-	}, nil
-}
-
-func (m mockCheckInsOutRepo) CheckRequest(attendanceID string) (checkinEntities.Checkin, error) {
-	return checkinEntities.Checkin{
-		ID:         "1",
-		Attendance: attendanceEntities.Attendance{ID: attendanceID, Employee: userEntities.User{ID: "3"}, Status: "approved"},
-	}, nil
-}
-
-func (m mockCheckInsOutRepo) CheckData(userID, attendanceID string) int {
-	return 1
-}
-
-func (m mockCheckInsOutRepo) CheckIn(checkin checkinEntities.Checkin) (checkinEntities.Checkin, error) {
-	return checkinEntities.Checkin{
-		ID:          "1",
-		Attendance:  attendanceEntities.Attendance{ID: "2"},
-		Temprature:  35.2,
+func dummyCheckinout(t *testing.T) (checkinsouts _checkinsoutsEntities.Checkin) {
+	checkinsouts = _checkinsoutsEntities.Checkin{
+		ID:          _utils.RandomString(8),
+		Attendance:  _attendanceEntities.Attendance{ID: _utils.RandomString(8)},
+		Temprature:  35.0,
 		IsCheckIns:  true,
 		IsCheckOuts: false,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
-	}, nil
-}
+	}
 
-func (m mockCheckInsOutRepo) CheckOut(userID string, checkin checkinEntities.Checkin) (checkinEntities.Checkin, error) {
-	return checkinEntities.Checkin{
-		ID:          "1",
-		Attendance:  attendanceEntities.Attendance{ID: "2", Employee: userEntities.User{ID: userID}},
-		IsCheckOuts: true,
-		UpdatedAt:   time.Now(),
-	}, nil
+	return
 }
