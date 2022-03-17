@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/utils/request/certificateRequest"
 )
 
+//go:generate mockgen --destination=./../../../mocks/certificate/service/mock_service_certificate.go -source=interface.go
 type CertificateServiceInterface interface {
 	GetCertificates(orderBy string) ([]certificateEntities.Certificates, error)
 	GetCertificate(id string) (certificateEntities.Certificate, error)

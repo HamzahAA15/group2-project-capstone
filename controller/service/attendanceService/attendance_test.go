@@ -2,314 +2,361 @@ package attendanceService
 
 import (
 	"errors"
-	"sirclo/project-capstone/entities/attendanceEntities"
-	"sirclo/project-capstone/entities/dayEntities"
-	"sirclo/project-capstone/entities/userEntities"
-	"sirclo/project-capstone/utils/request/attendanceRequest"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	_attendanceEntities "sirclo/project-capstone/entities/attendanceEntities"
+	_dayEntities "sirclo/project-capstone/entities/dayEntities"
+	_userEntities "sirclo/project-capstone/entities/userEntities"
+	_mockAttendanceRepo "sirclo/project-capstone/mocks/attendance/repository"
+	_mockUserRepo "sirclo/project-capstone/mocks/user/repository"
+	_utils "sirclo/project-capstone/utils"
+	_attendanceRequest "sirclo/project-capstone/utils/request/attendanceRequest"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 func TestGetAttendancesById(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	_, name, err := attServiceMock.GetAttendancesById("3")
-	assert.Nil(t, err)
-	assert.Equal(t, "jundana", name)
+	testCases := []struct {
+		name         string
+		idAttendance string
+		mockRepo     func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
+		{
+			name:         "Success Get Data",
+			idAttendance: "1",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesById(gomock.Eq("1")).Return(_utils.RandomString(8), _utils.RandomString(8), nil).Times(1)
+			},
+		},
+		{
+			name:         "Error Get Data",
+			idAttendance: "2",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesById(gomock.Eq("2")).Return(_utils.RandomString(8), _utils.RandomString(8), errors.New("Error Get Data")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _, _ = s.GetAttendancesById(tc.idAttendance)
+		})
+	}
 }
 
 func TestGetAttendancesCurrentUser(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att, err := attServiceMock.GetAttendancesCurrentUser("1", "approved", "asc")
-	expected := []attendanceEntities.Attendance{
+	attendancesData := dummyAttendances(t)
+
+	testCases := []struct {
+		name     string
+		idUser   string
+		status   string
+		order    string
+		mockRepo func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
 		{
-			ID:       "1",
-			Day:      dayEntities.Day{Date: time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.Local)},
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "jundana"},
+			name:   "Success Get Data",
+			idUser: "1",
+			status: "approved",
+			order:  "asc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesCurrentUser(gomock.Eq("1"), gomock.Eq("approved"), gomock.Eq("asc")).Return(attendancesData, nil).Times(1)
+			},
 		},
 		{
-			ID:       "2",
-			Day:      dayEntities.Day{Date: time.Date(time.Now().Year(), time.Now().Month()+1, 1, 0, 0, 0, 0, time.Local)},
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
+			name:   "Error Get Data",
+			idUser: "2",
+			status: "rejected",
+			order:  "desc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesCurrentUser(gomock.Eq("2"), gomock.Eq("rejected"), gomock.Eq("desc")).Return(attendancesData, errors.New("Error Get Data")).Times(1)
+			},
+		}}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _ = s.GetAttendancesCurrentUser(tc.idUser, tc.status, tc.order)
+		})
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
 }
 
 func TestGetAttendancesRangeDate(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att, err := attServiceMock.GetAttendancesRangeDate("hamzah@sirclo.com", time.Now().String(), time.Now().AddDate(0, 0, 2).String(), "approved", "5ca05e7d-9536-4893-bdb6-0c04de89b047", "asc")
-	expected := []attendanceEntities.Attendance{
-		{
-			ID:       "1",
-			Day:      dayEntities.Day{Date: time.Now()},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "jundana"},
-		},
-		{
-			ID:       "4",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 1)},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
-		{
-			ID:       "8",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 2)},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
-}
+	attendancesData := dummyAttendances(t)
 
-func TestGetAttendancesRangeDateNil(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att, err := attServiceMock.GetAttendancesRangeDate("hamzah@sirclo.com", "", "", "approved", "5ca05e7d-9536-4893-bdb6-0c04de89b047", "asc")
-	expected := []attendanceEntities.Attendance{
+	testCases := []struct {
+		name          string
+		employeeEmail string
+		dateStart     string
+		dateEnd       string
+		status        string
+		idOffice      string
+		orderBy       string
+		mockRepo      func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
 		{
-			ID:       "1",
-			Day:      dayEntities.Day{Date: time.Now()},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "jundana"},
+			name:          "Success Get Data",
+			employeeEmail: "test@mail.com",
+			dateStart:     "2001-01-01",
+			dateEnd:       "2001-01-01",
+			status:        "approved",
+			idOffice:      "5ca05e7d-9536-4893-bdb6-0c04de89b047",
+			orderBy:       "asc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesRangeDate(gomock.Eq("test@mail.com"), gomock.Eq("2001-01-01"), gomock.Eq("2001-01-01"), gomock.Eq("approved"), gomock.Eq("5ca05e7d-9536-4893-bdb6-0c04de89b047"), gomock.Eq("asc")).Return(attendancesData, nil).Times(1)
+			},
 		},
 		{
-			ID:       "4",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 1)},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
+			name:          "Error Get Data",
+			employeeEmail: "fail@mail.com",
+			dateStart:     "2002-02-02",
+			dateEnd:       "2002-02-02",
+			status:        "rejected",
+			idOffice:      "5ca05e7d-9536-4893-bdb6-0c04de89b047",
+			orderBy:       "desc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesRangeDate(gomock.Eq("fail@mail.com"), gomock.Eq("2002-02-02"), gomock.Eq("2002-02-02"), gomock.Eq("rejected"), gomock.Eq("5ca05e7d-9536-4893-bdb6-0c04de89b047"), gomock.Eq("desc")).Return(attendancesData, errors.New("Error Get Data")).Times(1)
+			},
 		},
 		{
-			ID:       "8",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 2)},
-			OfficeId: "5ca05e7d-9536-4893-bdb6-0c04de89b047",
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "hamzah"},
-			Status:   "approved",
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
+			name:          "Success Get Data if DateStart is Empty",
+			employeeEmail: "test@mail.com",
+			dateStart:     "",
+			dateEnd:       "2003-03-03",
+			status:        "approved",
+			idOffice:      "5ca05e7d-9536-4893-bdb6-0c04de89b047",
+			orderBy:       "asc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesRangeDate(gomock.Eq("test@mail.com"), gomock.Any(), gomock.Eq("2003-03-03"), gomock.Eq("approved"), gomock.Eq("5ca05e7d-9536-4893-bdb6-0c04de89b047"), gomock.Eq("asc")).Return([]_attendanceEntities.Attendance{}, nil).Times(1)
+			},
+		},
+		{
+			name:          "Success Get Data if DateEnd is Empty",
+			employeeEmail: "test@mail.com",
+			dateStart:     "2004-04-04",
+			dateEnd:       "",
+			status:        "approved",
+			idOffice:      "5ca05e7d-9536-4893-bdb6-0c04de89b047",
+			orderBy:       "asc",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().GetAttendancesRangeDate(gomock.Eq("test@mail.com"), gomock.Eq("2004-04-04"), gomock.Any(), gomock.Eq("approved"), gomock.Eq("5ca05e7d-9536-4893-bdb6-0c04de89b047"), gomock.Eq("asc")).Return(attendancesData, nil).Times(1)
+			},
 		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _ = s.GetAttendancesRangeDate(tc.employeeEmail, tc.dateStart, tc.dateEnd, tc.status, tc.idOffice, tc.orderBy)
+		})
+	}
 }
 
 func TestIsCheckins(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att, err := attServiceMock.IsCheckins()
-	expected := []attendanceEntities.Attendance{
+	attendancesData := dummyAttendances(t)
+
+	testCases := []struct {
+		name     string
+		mockRepo func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
 		{
-			ID:            "2",
-			Employee:      userEntities.User{Email: "hamzah@sirclo.com", Name: "hamzah", Avatar: "https://ui-avatars.com/api/?name=Hamzah"},
-			Office:        "Head Office",
-			StatusCheckin: "Checkin",
+			name: "Success Data",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().IsCheckins().Return(attendancesData, nil).Times(1)
+			},
 		},
 		{
-			ID:            "5",
-			Employee:      userEntities.User{Email: "lukman@sirclo.com", Name: "lukman", Avatar: "https://ui-avatars.com/api/?name=Lukman"},
-			Office:        "Head Office",
-			StatusCheckin: "Checkin",
+			name: "Error Data",
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().IsCheckins().Return(attendancesData, errors.New("Error Get Data")).Times(1)
+			},
 		},
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _ = s.IsCheckins()
+		})
+	}
 }
 
 func TestCreateAttendance(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att1 := attendanceRequest.CreateAttRequest{
-		Day: "1",
+	attendanceData := dummyAttendance(t)
+
+	testCases := []struct {
+		name     string
+		idLogin  string
+		body     _attendanceRequest.CreateAttRequest
+		mockRepo func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
+		{
+			name:    "Success Create",
+			idLogin: "1",
+			body: _attendanceRequest.CreateAttRequest{
+				Day: "1",
+			},
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().CreateAttendance(gomock.Any()).Return(attendanceData, nil).Times(1)
+			},
+		},
+		{
+			name:    "Error Create",
+			idLogin: "2",
+			body: _attendanceRequest.CreateAttRequest{
+				Day: "2",
+			},
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().CreateAttendance(gomock.Any()).Return(attendanceData, errors.New("Error Create")).Times(1)
+			},
+		},
 	}
-	att, err := attServiceMock.CreateAttendance("12", att1)
-	expected := attendanceEntities.Attendance{
-		ID:       "1",
-		Day:      dayEntities.Day{ID: "1"},
-		Employee: userEntities.User{ID: "12"},
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _ = s.CreateAttendance(tc.idLogin, tc.body)
+		})
 	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
 }
+
 func TestUpdateAttendance(t *testing.T) {
-	attServiceMock := NewAttendanceService(mockAttendanceRepo{}, mockUserRepository{})
-	att1 := attendanceRequest.UpdateAttRequest{
-		ID:     "1",
+	attendanceData := dummyAttendance(t)
+
+	testCases := []struct {
+		name     string
+		idLogin  string
+		body     _attendanceRequest.UpdateAttRequest
+		mockRepo func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface)
+	}{
+		{
+			name:    "Success Update",
+			idLogin: "1",
+			body: _attendanceRequest.UpdateAttRequest{
+				ID:     _utils.RandomString(8),
+				Status: "approved",
+				Notes:  _utils.RandomString(20),
+				Admin:  _utils.RandomString(8),
+			},
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().UpdateAttendance(gomock.Any()).Return(attendanceData, nil).Times(1)
+			},
+		},
+		{
+			name:    "Error Update",
+			idLogin: "2",
+			body: _attendanceRequest.UpdateAttRequest{
+				ID:     _utils.RandomString(8),
+				Status: "approved",
+				Notes:  _utils.RandomString(20),
+				Admin:  _utils.RandomString(8),
+			},
+			mockRepo: func(attendance *_mockAttendanceRepo.MockAttendanceRepoInterface, user *_mockUserRepo.MockUserRepoInterface) {
+				attendance.EXPECT().UpdateAttendance(gomock.Any()).Return(attendanceData, errors.New("Error Update")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockAttendanceRepo := _mockAttendanceRepo.NewMockAttendanceRepoInterface(ctrl)
+			mockUserRepo := _mockUserRepo.NewMockUserRepoInterface(ctrl)
+			tc.mockRepo(mockAttendanceRepo, mockUserRepo)
+
+			s := NewAttendanceService(mockAttendanceRepo, mockUserRepo)
+			_, _ = s.UpdateAttendance(tc.idLogin, tc.body)
+		})
+	}
+}
+
+func dummyAttendances(t *testing.T) (attendances []_attendanceEntities.Attendance) {
+	attendances = []_attendanceEntities.Attendance{
+		{
+			ID: _utils.RandomString(8),
+			Day: _dayEntities.Day{
+				Date: time.Now(),
+			},
+			OfficeId: _utils.RandomString(8),
+			Office:   "Head Office",
+			Employee: _userEntities.User{
+				Avatar: "https://ui-avatars.com/api/?name=" + _utils.RandomString(5),
+				Email:  _utils.RandomString(5) + "@" + _utils.RandomString(4) + ".com",
+				Nik:    "327658403093",
+				Name:   _utils.RandomString(5),
+			},
+			Status: "approved",
+			Notes:  _utils.RandomString(20),
+			Admin: _userEntities.User{
+				Name: _utils.RandomString(5),
+			},
+			StatusCheckin: "checkin",
+		},
+	}
+
+	return
+}
+
+func dummyAttendance(t *testing.T) (attendance _attendanceEntities.Attendance) {
+	attendance = _attendanceEntities.Attendance{
+		ID: _utils.RandomString(8),
+		Day: _dayEntities.Day{
+			Date: time.Now(),
+		},
+		OfficeId: _utils.RandomString(8),
+		Office:   "Head Office",
+		Employee: _userEntities.User{
+			Avatar: "https://ui-avatars.com/api/?name=" + _utils.RandomString(5),
+			Email:  _utils.RandomString(5) + "@" + _utils.RandomString(4) + ".com",
+			Nik:    "327658403093",
+			Name:   _utils.RandomString(5),
+		},
 		Status: "approved",
-		Notes:  "",
-		Admin:  "1",
-	}
-	att, err := attServiceMock.UpdateAttendance("1", att1)
-	expected := attendanceEntities.Attendance{
-		ID:     "1",
-		Status: "approved",
-		Notes:  "",
-		Admin:  userEntities.User{ID: "1"},
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, expected, att)
-}
-
-type mockAttendanceRepo struct{}
-
-func (m mockAttendanceRepo) GetAttendancesById(attID string) (string, string, error) {
-	return "1", "jundana", nil
-}
-
-func (m mockAttendanceRepo) GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error) {
-	return []attendanceEntities.Attendance{
-		{
-			ID:       "1",
-			Day:      dayEntities.Day{Date: time.Now()},
-			OfficeId: officeId,
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: employeeEmail, Nik: "327658403093", Name: "Hamzah"},
-			Status:   status,
-			Notes:    "",
-			Admin:    userEntities.User{Name: "jundana"},
+		Notes:  _utils.RandomString(20),
+		Admin: _userEntities.User{
+			Name: _utils.RandomString(5),
 		},
-		{
-			ID:       "4",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 1)},
-			OfficeId: officeId,
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: employeeEmail, Nik: "327658403093", Name: "hamzah"},
-			Status:   status,
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
-		{
-			ID:       "8",
-			Day:      dayEntities.Day{Date: time.Now().AddDate(0, 0, 2)},
-			OfficeId: officeId,
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: employeeEmail, Nik: "327658403093", Name: "hamzah"},
-			Status:   status,
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
-	}, nil
-}
-
-func (m mockAttendanceRepo) GetAttendancesCurrentUser(userId, status, order string) ([]attendanceEntities.Attendance, error) {
-	return []attendanceEntities.Attendance{
-		{
-			ID:       "1",
-			Day:      dayEntities.Day{Date: time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.Local)},
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   status,
-			Notes:    "",
-			Admin:    userEntities.User{Name: "jundana"},
-		},
-		{
-			ID:       "2",
-			Day:      dayEntities.Day{Date: time.Date(time.Now().Year(), time.Now().Month()+1, 1, 0, 0, 0, 0, time.Local)},
-			Office:   "Head Office",
-			Employee: userEntities.User{Avatar: "https://ui-avatars.com/api/?name=Hamzah", Email: "hamzah@sirclo.com", Nik: "327658403093", Name: "Hamzah"},
-			Status:   status,
-			Notes:    "",
-			Admin:    userEntities.User{Name: "felicia"},
-		},
-	}, nil
-}
-
-func (m mockAttendanceRepo) IsCheckins() ([]attendanceEntities.Attendance, error) {
-	return []attendanceEntities.Attendance{
-		{
-			ID:            "2",
-			Employee:      userEntities.User{Email: "hamzah@sirclo.com", Name: "hamzah", Avatar: "https://ui-avatars.com/api/?name=Hamzah"},
-			Office:        "Head Office",
-			StatusCheckin: "Checkin",
-		},
-		{
-			ID:            "5",
-			Employee:      userEntities.User{Email: "lukman@sirclo.com", Name: "lukman", Avatar: "https://ui-avatars.com/api/?name=Lukman"},
-			Office:        "Head Office",
-			StatusCheckin: "Checkin",
-		},
-	}, nil
-}
-
-func (m mockAttendanceRepo) CreateAttendance(att attendanceEntities.Attendance) (attendanceEntities.Attendance, error) {
-	return attendanceEntities.Attendance{
-		ID:       "1",
-		Day:      dayEntities.Day{ID: att.Day.ID},
-		Employee: userEntities.User{ID: att.Employee.ID},
-	}, nil
-}
-
-func (m mockAttendanceRepo) UpdateAttendance(att attendanceEntities.Attendance) (attendanceEntities.Attendance, error) {
-	return attendanceEntities.Attendance{
-		ID:     att.ID,
-		Status: att.Status,
-		Notes:  att.Notes,
-		Admin:  userEntities.User{ID: att.Admin.ID},
-	}, nil
-}
-
-type mockUserRepository struct{}
-
-func (m mockUserRepository) GetUser(id string) (userEntities.User, error) {
-	var gagal userEntities.User
-	if id == "2" {
-		return gagal, errors.New("error")
+		StatusCheckin: "checkin",
 	}
 
-	return userEntities.User{
-		ID:    "1",
-		Name:  "hallo",
-		Email: "mail@test.com",
-	}, nil
-}
-
-func (m mockUserRepository) CheckEmail(userChecked userEntities.User) (userEntities.User, error) {
-	return userEntities.User{}, nil
-}
-
-func (m mockUserRepository) Login(identity string) (userEntities.User, error) {
-	return userEntities.User{}, nil
-}
-
-func (m mockUserRepository) CreateUser(user userEntities.User) (userEntities.User, error) {
-	return userEntities.User{
-		ID:    "1",
-		Name:  "hallo",
-		Email: "mail@test.com",
-	}, nil
-}
-func (m mockUserRepository) UpdateUser(user userEntities.User) (userEntities.User, error) {
-	return userEntities.User{}, nil
-
-}
-func (m mockUserRepository) UploadAvatarUser(user userEntities.User) error {
-	return nil
+	return
 }
