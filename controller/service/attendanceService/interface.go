@@ -5,6 +5,7 @@ import (
 	"sirclo/project-capstone/utils/request/attendanceRequest"
 )
 
+//go:generate mockgen --destination=./../../../mocks/attendance/service/mock_service_attendance.go -source=interface.go
 type AttServiceInterface interface {
 	GetAttendancesById(attID string) (string, string, error)
 	GetAttendancesRangeDate(employeeEmail, dateStart, dateEnd, status, officeId, order string) ([]attendanceEntities.Attendance, error)
