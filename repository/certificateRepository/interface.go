@@ -2,6 +2,7 @@ package certificateRepository
 
 import "sirclo/project-capstone/entities/certificateEntities"
 
+//go:generate mockgen --destination=./../../mocks/certificate/repository/mock_repository_certificate.go -source=interface.go
 type CertificateInterface interface {
 	GetCertificates(orderBy string) ([]certificateEntities.Certificates, error)
 	GetCertificate(id string) (certificateEntities.Certificate, error)
