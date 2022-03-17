@@ -2,181 +2,370 @@ package certificateService
 
 import (
 	"errors"
-	"sirclo/project-capstone/entities/certificateEntities"
-	"sirclo/project-capstone/entities/userEntities"
-	"sirclo/project-capstone/utils/request/certificateRequest"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	_certificateEntities "sirclo/project-capstone/entities/certificateEntities"
+	_userEntities "sirclo/project-capstone/entities/userEntities"
+	_mockCertificateRepo "sirclo/project-capstone/mocks/certificate/repository"
+	_utils "sirclo/project-capstone/utils"
+	_certificateRequest "sirclo/project-capstone/utils/request/certificateRequest"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 func TestGetCertificates(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	certificate, err := certificateServiceMock.GetCertificates("ASC")
-	expected, _ := []certificateEntities.Certificates{
+	certificatesData := dummyCertificates(t)
+
+	testCases := []struct {
+		name                string
+		orderBy             string
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
 		{
-			User: userEntities.User{
-				ID:    "1-user",
-				Name:  "User Name",
-				Email: "User Email",
-			},
-			Certificates: []certificateEntities.Certificate{
-				{
-					ID:     "1-certificate",
-					Dosage: 1,
-				},
+			name:    "success",
+			orderBy: "asc",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificates(gomock.Eq("asc")).Return(certificatesData, nil).Times(1)
 			},
 		},
-	}, err
+		{
+			name:    "error",
+			orderBy: "desc",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificates(gomock.Eq("desc")).Return(certificatesData, errors.New("error")).Times(1)
+			},
+		},
+	}
 
-	assert.Nil(t, err)
-	assert.Equal(t, expected, certificate)
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_, _ = s.GetCertificates(tc.orderBy)
+		})
+	}
 }
 
 func TestGetCertificate(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	certificate, err := certificateServiceMock.GetCertificate("1-ceritificate")
-	assert.Nil(t, err)
-	assert.Equal(t, "1-certificate", certificate.ID, "ID Certificate tidak sama")
-	assert.Equal(t, 1, certificate.Dosage, "Dosis tidak sama")
+	certificateData := dummyCertificate(t)
+
+	testCases := []struct {
+		name                string
+		id                  string
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
+		{
+			name: "success",
+			id:   "1",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificate(gomock.Eq("1")).Return(certificateData, nil).Times(1)
+			},
+		},
+		{
+			name: "error",
+			id:   "2",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificate(gomock.Eq("2")).Return(certificateData, errors.New("error")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_, _ = s.GetCertificate(tc.id)
+		})
+	}
 }
 
 func TestGetCertificateUser(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	cerificate, err := certificateServiceMock.GetCertificateUser("1-user")
-	expected, _ := []certificateEntities.Certificate{
+	certificatesData := dummyCertificateUser(t)
+
+	testCases := []struct {
+		name                string
+		idUser              string
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
 		{
-			ID:     "1-certificate",
-			Dosage: 1,
+			name:   "success",
+			idUser: "1",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificateUser(gomock.Eq("1")).Return(certificatesData, nil).Times(1)
+			},
 		},
 		{
-			ID:     "2-certificate",
-			Dosage: 2,
+			name:   "error",
+			idUser: "2",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificateUser(gomock.Eq("2")).Return(certificatesData, errors.New("error")).Times(1)
+			},
 		},
-	}, err
-	assert.Nil(t, err)
-	assert.Equal(t, expected, cerificate)
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_, _ = s.GetCertificateUser(tc.idUser)
+		})
+	}
 }
 
 func TestCountVaccineIsPending(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	count := certificateServiceMock.CountVaccineIsPending("1-user", 1)
-	assert.Equal(t, 1, count, "tidak sesuai")
+	testCases := []struct {
+		name                string
+		idUser              string
+		dose                int
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
+		{
+			name:   "success",
+			idUser: "1",
+			dose:   1,
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().CountVaccineIsPending(gomock.Eq("1"), gomock.Eq(1)).Return(1).Times(1)
+			},
+		},
+		{
+			name:   "error",
+			idUser: "2",
+			dose:   2,
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().CountVaccineIsPending(gomock.Eq("2"), gomock.Eq(2)).Return(0).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_ = s.CountVaccineIsPending(tc.idUser, tc.dose)
+		})
+	}
 }
 
 func TestGetVaccineDose(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	count := certificateServiceMock.GetVaccineDose("1-user", "approved")
-	assert.Equal(t, 1, count, "tidak sesuai")
+	testCases := []struct {
+		name                string
+		idUser              string
+		status              string
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
+		{
+			name:   "success",
+			idUser: "1",
+			status: "approved",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetVaccineDose(gomock.Eq("1"), gomock.Eq("approved")).Return(1).Times(1)
+			},
+		},
+		{
+			name:   "error",
+			idUser: "2",
+			status: "approved",
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetVaccineDose(gomock.Eq("2"), gomock.Eq("approved")).Return(0).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_ = s.GetVaccineDose(tc.idUser, tc.status)
+		})
+	}
 }
 
 func TestUploadCertificateVaccine(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
+	certificateData := dummyCertificate(t)
 
-	input := certificateRequest.CertificateUploadRequest{
-		ID:     "1",
-		Image:  "https://urlimage",
-		Dosage: 1,
-		Status: "pending",
+	testCases := []struct {
+		name                string
+		idUser              string
+		body                _certificateRequest.CertificateUploadRequest
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
+		{
+			name:   "success",
+			idUser: "1",
+			body: _certificateRequest.CertificateUploadRequest{
+				Image: _utils.RandomString(6),
+			},
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().UploadCertificateVaccine(gomock.Any()).Return(certificateData, nil).Times(1)
+			},
+		},
+		{
+			name:   "error",
+			idUser: "2",
+			body: _certificateRequest.CertificateUploadRequest{
+				Image: _utils.RandomString(6),
+			},
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().UploadCertificateVaccine(gomock.Any()).Return(certificateData, errors.New("error")).Times(1)
+			},
+		},
 	}
 
-	certificate, err := certificateServiceMock.UploadCertificateVaccine("1-user", input)
-	assert.Nil(t, err)
-	assert.Equal(t, "1-certificate", certificate.ID, "tidak sama")
-	assert.Equal(t, 1, certificate.Dosage, "tidak sama")
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_, _ = s.UploadCertificateVaccine(tc.idUser, tc.body)
+		})
+	}
 }
 
 func TestVerifyCertificate(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
+	certificateData := dummyCertificate(t)
 
-	input := certificateRequest.CertificateVerificationRequest{
-		ID:        "1",
-		Status:    "approved",
-		AdminID:   "1-admin",
-		UpdatedAt: time.Now(),
-	}
-
-	certificate, _ := certificateServiceMock.VerifyCertificate("1-certificate", "1-user", input)
-	assert.Equal(t, "1-certificate", certificate.ID, "tidak sama")
-	assert.Equal(t, "approved", certificate.Status, "tidak sama")
-}
-
-func TestVerifyCertificateError(t *testing.T) {
-	certificateServiceMock := NewCertificateService(mockCertificateRepository{})
-	input := certificateRequest.CertificateVerificationRequest{
-		ID:        "5",
-		Status:    "approved",
-		AdminID:   "1-admin",
-		UpdatedAt: time.Now(),
-	}
-	_, err := certificateServiceMock.VerifyCertificate("5", "1-user", input)
-	assert.NotNil(t, err)
-}
-
-type mockCertificateRepository struct{}
-
-func (mock mockCertificateRepository) GetCertificates(orderBy string) ([]certificateEntities.Certificates, error) {
-	return []certificateEntities.Certificates{
+	testCases := []struct {
+		name                string
+		id                  string
+		idUser              string
+		body                _certificateRequest.CertificateVerificationRequest
+		mockCertificateRepo func(certificate *_mockCertificateRepo.MockCertificateInterface)
+	}{
 		{
-			User: userEntities.User{
-				ID:    "1-user",
-				Name:  "User Name",
-				Email: "User Email",
+			name:   "success",
+			id:     "1",
+			idUser: "1",
+			body: _certificateRequest.CertificateVerificationRequest{
+				ID:        "1",
+				Status:    "approved",
+				AdminID:   _utils.RandomString(8),
+				UpdatedAt: time.Now(),
 			},
-			Certificates: []certificateEntities.Certificate{
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificate(gomock.Eq("1")).Return(certificateData, nil).Times(1)
+				certificate.EXPECT().VerifyCertificate(gomock.Any()).Return(certificateData, nil).Times(1)
+			},
+		},
+		{
+			name:   "error ID",
+			id:     "2",
+			idUser: "2",
+			body: _certificateRequest.CertificateVerificationRequest{
+				ID:        "2",
+				Status:    "approved",
+				AdminID:   _utils.RandomString(8),
+				UpdatedAt: time.Now(),
+			},
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificate(gomock.Eq("2")).Return(certificateData, errors.New("error ID")).Times(1)
+			},
+		},
+		{
+			name:   "error verification",
+			id:     "3",
+			idUser: "3",
+			body: _certificateRequest.CertificateVerificationRequest{
+				ID:        "3",
+				Status:    "approved",
+				AdminID:   _utils.RandomString(8),
+				UpdatedAt: time.Now(),
+			},
+			mockCertificateRepo: func(certificate *_mockCertificateRepo.MockCertificateInterface) {
+				certificate.EXPECT().GetCertificate(gomock.Eq("3")).Return(certificateData, nil).Times(1)
+				certificate.EXPECT().VerifyCertificate(gomock.Any()).Return(certificateData, errors.New("error verification")).Times(1)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockRepo := _mockCertificateRepo.NewMockCertificateInterface(ctrl)
+			tc.mockCertificateRepo(mockRepo)
+
+			s := NewCertificateService(mockRepo)
+			_, _ = s.VerifyCertificate(tc.id, tc.idUser, tc.body)
+		})
+	}
+}
+
+func dummyCertificates(t *testing.T) (certificates []_certificateEntities.Certificates) {
+	certificates = []_certificateEntities.Certificates{
+		{
+			User: _userEntities.User{
+				ID:    _utils.RandomString(8),
+				Name:  _utils.RandomString(10),
+				Email: _utils.RandomString(4) + "@" + _utils.RandomString(5) + ".com",
+			},
+			Certificates: []_certificateEntities.Certificate{
 				{
-					ID:     "1-certificate",
+					ID:     _utils.RandomString(8),
+					Image:  "https://" + _utils.RandomString(4) + ".com",
 					Dosage: 1,
+					Status: "pending",
+					Admin:  _userEntities.User{ID: _utils.RandomString(8)},
 				},
 			},
 		},
-	}, nil
-}
-
-func (mock mockCertificateRepository) GetCertificate(id string) (certificateEntities.Certificate, error) {
-	if id == "5" {
-		return certificateEntities.Certificate{}, errors.New("error bang")
 	}
-	return certificateEntities.Certificate{
-		ID:     "1-certificate",
-		Dosage: 1,
-	}, nil
+
+	return
 }
 
-func (mock mockCertificateRepository) GetCertificateUser(userID string) ([]certificateEntities.Certificate, error) {
-	return []certificateEntities.Certificate{
+func dummyCertificateUser(t *testing.T) (certificates []_certificateEntities.Certificate) {
+	certificates = []_certificateEntities.Certificate{
 		{
-			ID:     "1-certificate",
+			ID:     _utils.RandomString(8),
+			Image:  "https://" + _utils.RandomString(4) + ".com",
 			Dosage: 1,
+			Status: "approved",
+			Admin:  _userEntities.User{ID: _utils.RandomString(8)},
 		},
-		{
-			ID:     "2-certificate",
-			Dosage: 2,
-		},
-	}, nil
+	}
+
+	return
 }
 
-func (mock mockCertificateRepository) CountVaccineIsPending(userID string, dossage int) int {
-	return 1
-}
-
-func (mock mockCertificateRepository) GetVaccineDose(userID string, status string) int {
-	return 1
-}
-
-func (mock mockCertificateRepository) UploadCertificateVaccine(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error) {
-	return certificateEntities.Certificate{
-		ID:     "1-certificate",
+func dummyCertificate(t *testing.T) (certificate _certificateEntities.Certificate) {
+	certificate = _certificateEntities.Certificate{
+		ID:     _utils.RandomString(8),
+		Image:  "https://" + _utils.RandomString(4) + ".com",
 		Dosage: 1,
-	}, nil
-}
+		Status: "pending",
+		Admin:  _userEntities.User{ID: _utils.RandomString(8)},
+	}
 
-func (mock mockCertificateRepository) VerifyCertificate(certificate certificateEntities.Certificate) (certificateEntities.Certificate, error) {
-	return certificateEntities.Certificate{
-		ID:     "1-certificate",
-		Dosage: 1,
-		Status: "approved",
-		Admin:  userEntities.User{ID: "1-admin"},
-	}, nil
+	return
 }
